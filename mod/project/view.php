@@ -23,14 +23,12 @@
  * @copyright  2009 Petr Skoda (http://skodak.org)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 require('../../config.php');
 require_once($CFG->dirroot.'/mod/project/locallib.php');
 //require_once($CFG->libdir.'/completionlib.php');
 
 $id      = optional_param('id', 0, PARAM_INT); // Course Module ID
 $p       = optional_param('p', 0, PARAM_INT);  // project instance ID
-$inpopup = optional_param('inpopup', 0, PARAM_BOOL);
 
 if ($p) {
     if (!$project = $DB->get_record('project', array('id'=>$p))) {
@@ -50,19 +48,14 @@ require_course_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/project:view', $context);
 
+user_has_role_assignment($USER->id,5); // $roleid == 5 for student role //inside functions declare "global $USER;"
+//$cContext = context_course::instance($COURSE->id); // global $COURSE
+$isAdmin = has_capability ('moodle/course:update', $context) ? true : false;
+
 $PAGE->set_url('/mod/project/view.php', array('id' => $cm->id));
 
 $options = empty($project->displayoptions) ? array() : unserialize($project->displayoptions);
 
-if ($inpopup and $project->display == RESOURCELIB_DISPLAY_POPUP) {
-    $PAGE->set_projectlayout('popup');
-    $PAGE->set_title($course->shortname.': '.$project->name);
-    $PAGE->set_heading($course->fullname);
-} else {
-    $PAGE->set_title($course->shortname.': '.$project->name);
-    $PAGE->set_heading($course->fullname);
-    $PAGE->set_activity_record($project);
-}
 $PAGE->requires->jquery();
 $PAGE->requires->jquery_plugin('ui');
 $PAGE->requires->jquery_plugin('ui-css');
@@ -70,6 +63,20 @@ $PAGE->requires->jquery_plugin('ui-css');
 /// Check to see if groups are being used here
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = groups_get_activity_group($cm, true);
+
+//var_dump($USER);
+if(isset($_GET['group']) && $isAdmin)
+	$currentgroup = $_GET['group'];
+	
+if($isAdmin && empty($_GET['group']) ){
+	$adminpage = 'Administrators Group Project Selection<br /><br />';
+	$adminpage .= 'Please select the group name of the project you wish to view:<br /><br />';
+	$groups = listGroups($course->id);
+	foreach($groups as $group){
+		$adminpage .= "<a href='view.php?id=".$id."&group=".$group->id."'>".$group->name."<br />";
+	}
+}
+	
 
 // url parameters
 $params = array();
@@ -150,11 +157,13 @@ $html .= "<table border=1 width=80%><tr><td style='vertical-align:top;'><table><
 	} //end foreach loop
 
 //Display Workload distribution link and possible alert.
+if(count($tasks)>0){
 $workload_alert = AlertWorkloadDistribution($currentgroup);
 $html .= "<br/> <a href='workload_distribution.php?cmid=".$id."&p=".$project->id."' style='a:link{color: #f00;}' >Workload Distribution</a>"; //Display link
 if($workload_alert){
 	$html .= " <img src='pix\alert_icon.png'' width='12px' height='12px'/>"; //If alert is true, lets display an icon for attention
-}
+}//end if there are alerts
+}//end if no tasks check
 
 //Display Project Comparison with other groups in the course
 $html .= "<br/> <a href='group_compare.php?cmid=".$id."&p=".$project->id."'>Progress Comparison with other Groups</a>";
@@ -217,6 +226,9 @@ $html .="</table><table><tr><td><u>Communication History</u><br/>";
 
 $html .= "</table></table>";
 
+if(isset($adminpage))
+$content = $adminpage;
+else
 $content = $html;
 //$content = format_text($content, $project->contentformat, $formatoptions);
 echo $OUTPUT->box($content, "generalbox center clearfix");

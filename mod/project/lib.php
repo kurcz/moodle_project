@@ -243,6 +243,17 @@ function getStudentName($userid){
 }
 
 /**
+ * List all groups in a course
+ * @param int courseid
+ * return array groupids,groupnames
+*/
+function listGroups($course){
+	global $DB;
+	
+	return $DB->get_records('groups',array('courseid'=>$course),null, 'id,name');
+}
+
+/**
  * Get Group Name
  * @param int group id
  * return string groupname
@@ -397,10 +408,11 @@ function displayForums(){
 	global $CFG, $DB, $COURSE;
 
 	//If Forums are setup for Groups, display links to them.
+	$html = '';
 	if($forum = $DB->get_records('course_modules', array('module'=>9,  'course'=>$COURSE->id, 'groupmode'=>1), 'id,instance')){
 		foreach($forum as $forum_link){
 			$forum_name = $DB->get_record('forum', array('id'=>$forum_link->instance), 'name');
-			$html = ' <tr><td><img src="'.$CFG->wwwroot.'\mod\forum\pix\icon.png" width="16px" height="16px"> <a href="'.$CFG->wwwroot.'\mod\forum\view.php?id='.$forum_link->id.'">'.$forum_name->name.'</a></td></tr>';
+			$html .= ' <tr><td><img src="'.$CFG->wwwroot.'\mod\forum\pix\icon.png" width="16px" height="16px"> <a href="'.$CFG->wwwroot.'\mod\forum\view.php?id='.$forum_link->id.'">'.$forum_name->name.'</a></td></tr>';
 		}
 		//$html .= "<br />";
 	}
@@ -560,7 +572,7 @@ function checkAlerts($userid, $currentgroup){
 	//get an object of the current user and any potential alerts that may have lapsed.
 	$alerts = $DB->get_record('project_user_mapping', array('user_id'=>$userid), 'id,user_id,group_id,meetings_attended,meetings_total,meeting_alert,cohort_alert,forum_alert,import_alert');
 
-	if(count($alerts)){
+	if($alerts){
 	
 	if($alerts->cohort_alert+($config->prevcohortalertsfreq) < time() || $alerts->cohort_alert==0 )
 		checkPreviousCohorts($COURSE, $currentgroup);

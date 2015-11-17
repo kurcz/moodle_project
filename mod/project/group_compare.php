@@ -62,7 +62,8 @@ $group_members = $DB->get_records('groups_members', array('groupid'=>$currentgro
 //Display some headers
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string('Group Comparison'), 2);
-echo $OUTPUT->heading(format_string(getGroupName($currentgroup)), 4);
+if($currentgroup!=0)
+	echo $OUTPUT->heading(format_string(getGroupName($currentgroup)), 4);
 
 $html = "<table><tr><th>Group</th><th>% Complete</th></tr>";
 //Iterate all groups in the course, then find all the tasks and add up their associated percentages and divide by the total number of tasks
