@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $config = get_config('project');
 
-$module->version   = 2015100100;       // The current module version (Date: YYYYMMDDXX)
+$module->version   = 2015112000;       // The current module version (Date: YYYYMMDDXX)
 $module->requires  = 2013110500;    // Requires this Moodle version
 $module->component = 'mod_project';       // Full name of the plugin (used for diagnostics)
 $module->cron      = $config->cronrunfreq;

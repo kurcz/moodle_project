@@ -110,6 +110,8 @@ function project_add_instance($data, $mform = null) {
     // we need to use context now, so we need to make sure all needed info is already in db
     $id = $DB->set_field('course_modules', 'instance', $data->id, array('id'=>$cmid));
     $context = context_module::instance($cmid);
+	$DB->set_field('course_modules', 'groupmode', 1, array('id'=>$cmid)); //Automatically set separate Group Mode
+
 
     /*if ($mform and !empty($data->project['itemid'])) {
         $draftitemid = $data->project['itemid'];
@@ -149,6 +151,7 @@ function project_update_instance($data, $mform) {
     $data->contentformat = $data->project['format'];
 
     $DB->update_record('project', $data);
+	$DB->set_field('course_modules', 'groupmode', 1, array('id'=>$cmid)); //Automatically set separate Group Mode
 
     $context = context_module::instance($cmid);
     if ($draftitemid) {
