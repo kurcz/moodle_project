@@ -56,6 +56,9 @@ $PAGE->set_url('/mod/project/view.php', array('id' => $cm->id));
 
 $options = empty($project->displayoptions) ? array() : unserialize($project->displayoptions);
 
+$PAGE->set_title($course->shortname.': '.$project->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_activity_record($project);
 $PAGE->requires->jquery();
 $PAGE->requires->jquery_plugin('ui');
 $PAGE->requires->jquery_plugin('ui-css');
