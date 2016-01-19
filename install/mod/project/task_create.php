@@ -56,15 +56,9 @@ $PAGE->set_url('/mod/project/view.php', array('id' => $cm->id));
 
 $options = empty($project->displayoptions) ? array() : unserialize($project->displayoptions);
 
-if ($inpopup and $project->display == RESOURCELIB_DISPLAY_POPUP) {
-    $PAGE->set_projectlayout('popup');
-    $PAGE->set_title($course->shortname.': '.$project->name);
-    $PAGE->set_heading($course->fullname);
-} else {
-    $PAGE->set_title($course->shortname.': '.$project->name);
-    $PAGE->set_heading($course->fullname);
-    $PAGE->set_activity_record($project);
-}
+$PAGE->set_title($course->shortname.': '.$project->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_activity_record($project);
 
 /// Check to see if groups are being used here
 $groupmode = groups_get_activity_groupmode($cm);

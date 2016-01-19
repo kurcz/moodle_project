@@ -50,6 +50,10 @@ require_capability('mod/project:view', $context);
 
 $PAGE->set_url('/mod/project/workload_distribution.php', array('id' => $cm->id));
 
+$PAGE->set_title($course->shortname.': '.$project->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_activity_record($project);
+
 $options = empty($project->displayoptions) ? array() : unserialize($project->displayoptions);
 
 /// Check to see if groups are being used here

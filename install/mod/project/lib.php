@@ -504,6 +504,9 @@ function MemberWorkloadDistribution($hours, $equal_hours){
 *  Returns true when a member is found to be unbalanced.
 */
 function AlertWorkloadDistribution($group){
+	global $DB;
+	
+	$course = $DB->get_record('groups',array('id'=>$group),'courseid')->courseid;
 
 	$member_rank = RankMembersTasksDistribution($group);
 
@@ -515,6 +518,7 @@ function AlertWorkloadDistribution($group){
 		return;
 	foreach($member_rank as $key=>$member){
 		if(!empty(MemberWorkloadDistribution($member, $equal_hours))){
+			add_to_log($course, 'project', 'alert', 'workload dist: '.$group);
 			return true;
 			break;
 		}//end if
@@ -610,7 +614,7 @@ function checkAlerts($userid, $currentgroup){
 			 //Set a flag to true that the user has been alerted to not allow for repeat alerts until the next meeting.
 			$DB->set_field('project_user_mapping', 'meeting_alert', 1, array('user_id'=>$userid));
 			
-			add_to_log($course->id, 'project', 'alert', 'view.php', $project->id);
+			add_to_log($COURSE->id, 'project', 'alert', 'meeting attendance '.$alerts->meetings_attended.'/'.$alerts->meetings_total);
 	}//End check 
 	}//end if meetings > 0
 	}//end if alerts true
@@ -738,7 +742,7 @@ function checkPreviousCohorts($course, $currentgroup){
 		$DB->set_field('project_user_mapping', 'cohort_alert', time(), array('user_id'=>$USER->id));
 		}//end cohort pop time check
 			  
-		add_to_log($course->id, 'project', 'alert', 'view.php');
+		add_to_log($course->id, 'project', 'alert', 'very high risk');
 		echo $html;
 	}
 	
@@ -788,7 +792,7 @@ function checkPreviousCohorts($course, $currentgroup){
 
 		}//end cohort pop time check
 		
-		add_to_log($course->id, 'project', 'alert', 'view.php');
+		add_to_log($course->id, 'project', 'alert', 'high risk');
 		echo $html;
 				
 		}
@@ -803,7 +807,7 @@ function checkPreviousCohorts($course, $currentgroup){
 				You are at-risk because <b>'.count($failed_progress).'</b> groups had the same amount of work done and failed. To improve your risk level, you need to complete <b>'.($max_failed-$record->progress_percentage).'%</b> more of your project.
 			</div>';	
 		
-		add_to_log($course->id, 'project', 'alert', 'view.php');
+		add_to_log($course->id, 'project', 'alert', 'low risk');
 		echo $html;
 				
 		}
@@ -818,7 +822,7 @@ function checkPreviousCohorts($course, $currentgroup){
 				You are at-risk because <b>'.count($failed_progress).'</b> groups had the same amount of work done and failed. To improve your risk level, you need to complete <b>'.($avg_passed-$record->progress_percentage).'%</b> more of your project.
 			</div>';	
 		
-		add_to_log($course->id, 'project', 'alert', 'view.php');
+		add_to_log($course->id, 'project', 'alert', 'medium risk');
 		echo $html;
 		}
 	}
@@ -827,7 +831,7 @@ function checkPreviousCohorts($course, $currentgroup){
 
 /*Function to determine participation levels of forum users*/
 function checkForumParticpation($currentgroup, $alerts){
-global $DB, $USER, $CFG;
+global $DB, $USER, $COURSE, $CFG;
 
 $averages = $DB->get_record_sql('SELECT avg(coalesce(t1.msgchars,0)) as avgmsgsize
 FROM
@@ -954,7 +958,7 @@ LEFT JOIN `mdl_forum_discussions` t2
 			  });
 			  </script>';	
 	
-	add_to_log($course->id, 'project', 'alert-forum-'.$charCount[$USER->id]->alert, 'view.php');
+	add_to_log($COURSE->id, 'project', 'alert-forum', $charCount[$USER->id]->alert);
 	echo $html;
 	
 	$DB->set_field('project_user_mapping', 'forum_alert', time(), array('user_id'=>$USER->id));
@@ -965,7 +969,7 @@ LEFT JOIN `mdl_forum_discussions` t2
 
 /*Third party import chat participation check and alert function*/
 function checkImportedParticpation($currentgroup, $alerts){
-	global $DB, $CFG, $USER;
+	global $DB, $CFG, $COURSE, $USER;
 
 	$averages = $DB->get_record_sql('SELECT avg(coalesce(t3.msgchars,0)) as avgmsgsize
 	FROM
@@ -1085,7 +1089,7 @@ function checkImportedParticpation($currentgroup, $alerts){
 			  });
 			  </script>';	
 	
-	add_to_log($course->id, 'project', 'alert-skype-'.$charCount[$USER->id]->alert, 'view.php');
+	add_to_log($COURSE->id, 'project', 'alert-skype', $charCount[$USER->id]->alert);
 	echo $html;
 	
 	$DB->set_field('project_user_mapping', 'import_alert', time(), array('user_id'=>$USER->id));

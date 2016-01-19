@@ -52,6 +52,10 @@ $PAGE->set_url('/mod/project/workload_distribution.php', array('id' => $cm->id))
 
 $options = empty($project->displayoptions) ? array() : unserialize($project->displayoptions);
 
+$PAGE->set_title($course->shortname.': '.$project->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_activity_record($project);
+
 /// Check to see if groups are being used here
 $groupmode = groups_get_activity_groupmode($cm);
 $currentgroup = groups_get_activity_group($cm, true);
@@ -84,6 +88,9 @@ foreach($groups as $group){ //Iterate through each group in the course
 		$total_hours += $task->hours;
 	}
 	//$group_rank[$group->id][0] = $group->name; //Store Group Name
+	if($total_hours==0)
+		$group_rank[$group->id] = 0;
+	else
 	$group_rank[$group->id] = round($hours_complete/$total_hours*100); //Store rounded hours of the group progress.
 	$group_start[$group->id] = $start;
 	$group_end[$group->id] = $end;
@@ -99,6 +106,9 @@ foreach($group_rank as $key=>$sorted_group){
 	//Find how many days into the project a group is
 	$days_in = floor((time() - $group_start[$key])/(60*60*24));
 	//Find out what the percentage of time done is.
+	if($total_days==0)
+	$time_done = 0;
+	else
 	$time_done = round(($days_in / $total_days)*100,0);
 
 	if($time_done > $sorted_group){ //If more time has been completed then group progress, bad standing alert

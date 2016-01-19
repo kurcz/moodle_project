@@ -121,7 +121,7 @@ $html = ""; // Initiate blank HTML to create the screen.
 $html .= checkAlerts($USER->id, $currentgroup);
 
 //Draw the screen
-//Left side is the progrect side, Start with listing all the tasks
+//Left side is the project side, Start with listing all the tasks
 $html .= "<table border=1 width=80%><tr><td style='vertical-align:top;'><table><tr><td><u>List of Tasks</u><br /><br /><a href='task_edit.php?cmid=".$id."'>+ NEW TASK</a><br /><br />";
 	foreach($tasks as $task){
 		$name = getStudentName($task->members); //Get users assigned to the task
@@ -153,6 +153,7 @@ $html .= "<table border=1 width=80%><tr><td style='vertical-align:top;'><table><
 			$progress_bar_colour = '#0f0'; //Green
 		} else {
 			$progress_bar_colour = '#f00'; //Red
+			add_to_log($course->id, 'project', 'alert', 'task bad standing '.$task->progress .'% progress', $task->id);
 		}
 		$html .= '<div style="background-color: '.$progress_bar_colour.';width:'.$task->progress .'%; height:12px;">&nbsp;</div>'; //Green Progress bar to indicate complete
 		$html .= '<div style="position: relative;top:-11px;text-align:center;font-size:10px;font-weight:bold;">Progress: '.$task->progress.'%</div></div><br />';

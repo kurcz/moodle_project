@@ -920,15 +920,17 @@ function checkChatAlerts($chatuser){
 	$currentgroup = $chatuser->groupid;
 	sleep(1);
 /* Chat participation level analysis */
+	/*OLD AVG
 	$averages = $DB->get_record_sql('SELECT avg(message_char) as avgMsgSize
 FROM (
-    SELECT distinct A.userid, coalesce(sum(LENGTH(message)),0) as message_char FROM `mdl_groups_members` A LEFT JOIN `mdl_chat_messages` B ON A.userid = B.userid  WHERE A.groupid = '.$currentgroup.'
-GROUP BY userid) C');
+    SELECT distinct A.userid, coalesce(sum(LENGTH(message)),0) as message_char FROM `mdl_groups_members` A LEFT JOIN `mdl_chat_messages` B ON A.userid = B.userid  WHERE A.groupid = '.$currentgroup.' AND system = 0
+GROUP BY userid) C');*/
+$averages = $DB->get_record_sql('SELECT avg(LENGTH(message)) as avgmessage_char FROM `mdl_chat_messages_current` WHERE groupid =  '.$currentgroup.' AND system = 0')->avgmessage_char;
 
-	$message = new stdClass();
-	$message->size_small =  $averages->avgmsgsize*$config->smallmsg;
-	$message->size_medium = $averages->avgmsgsize*1.0;
-	$message->size_large =  $averages->avgmsgsize*$config->largemsg;
+	$message_size = new stdClass();
+	$message_size->small =  $averages*$config->smallmsg;
+	$message_size->medium = $averages*1.0;
+	$message_size->large =  $averages*$config->largemsg;
 
 	$charCount = new stdClass();
 	$charCount = $DB->get_records_sql('SELECT t4.userid, coalesce(t5.Schars,0) as Schars, coalesce(t1.Mchars,0) as Mchars, coalesce(t2.Lchars,0) as Lchars, coalesce(t3.Tchars,0) as Tchars
@@ -937,34 +939,47 @@ FROM
      WHERE groupid = '.$currentgroup.' ) t4
 LEFT JOIN
 	(SELECT userid, SUM(LENGTH(message)) as Mchars
-	FROM `mdl_chat_messages`
-	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) BETWEEN '.$message->size_small.' AND '.$message->size_large.'
+	FROM `mdl_chat_messages_current`
+	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) BETWEEN '.$message_size->small.' AND '.$message_size->large.'
 	GROUP BY userid) t1
 ON t4.userid = t1.userid
 LEFT JOIN
 	(SELECT userid, SUM(LENGTH(message)) as Lchars
-	FROM `mdl_chat_messages`
-	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) >  '.$message->size_large.'
+	FROM `mdl_chat_messages_current`
+	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) >  '.$message_size->large.'
 	GROUP BY userid) t2
 ON t1.userid = t2.userid
 LEFT JOIN
 	(SELECT userid, SUM(LENGTH(message)) as Tchars
-	FROM `mdl_chat_messages`
-	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) > '.$message->size_small.'
+	FROM `mdl_chat_messages_current`
+	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) > '.$message_size->small.'
 	GROUP BY userid )t3
 ON t1.userid = t3.userid
 LEFT JOIN
 	(SELECT userid, SUM(LENGTH(message)) as Schars
-	FROM `mdl_chat_messages`
-	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) < '.$message->size_large.'
+	FROM `mdl_chat_messages_current`
+	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) < '.$message_size->small.'
 	GROUP BY userid )t5
 ON t4.userid = t5.userid');
 	
 	$stats = new stdClass();
-	$stats = $DB->get_record_sql('SELECT SUM(LENGTH(message)) as Sum FROM `mdl_chat_messages` WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) >  '.$message->size_small);
+	$stats = $DB->get_record_sql('SELECT SUM(LENGTH(message)) as Sum FROM `mdl_chat_messages_current` WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) >  '.$message_size->small);
 	$stats->avg = $stats->sum/count($charCount);
 	$stats->low = $stats->avg * $config->lowthreshold;
 	$stats->high = $stats->avg * $config->highthreshold;
+	
+			//create alert object
+		$statsmsg = new stdclass();
+		$statsmsg->chatid = 0;
+		$statsmsg->userid = 0;
+		$statsmsg->groupid = $currentgroup;
+		$statsmsg->message =  'stats: avg: '.$averages.' avg by members:'.$stats->avg.' lo:'.$stats->low.' hi:'.$stats->high.' ms:'.$message_size->small.' mm:'.$message_size->medium.' ml: '.$message_size->large;
+		$statsmsg->system = 1;
+		$statsmsg->timestamp = time();
+
+		//insert alert message to the database
+		$messageid = $DB->insert_record('chat_messages', $statsmsg);
+		$DB->insert_record('chat_messages_current', $statsmsg);
 	
 	//Iterate through all members of a chat and find any who has a word count lower or higher than the thresholds
 	foreach($charCount as $member) {
@@ -976,7 +991,7 @@ ON t4.userid = t5.userid');
 			$message->chatid    = $chatuser->chatid;
 			$message->userid    = $member->userid;
 			$message->groupid   = $currentgroup;
-			$message->message   =  'alert-low';
+			$message->message   =  'alert-low totalchars:'.$member->tchars.' s:'.$member->schars.' m:'.$member->mchars.' l:'.$member->lchars;
 			$message->system    = 1;
 			$message->timestamp = time();
 	
@@ -994,7 +1009,7 @@ ON t4.userid = t5.userid');
 			$message->chatid    = $chatuser->chatid;
 			$message->userid    = $member->userid;
 			$message->groupid   = $currentgroup;
-			$message->message   =  'alert-high';
+			$message->message   =  'alert-high totalchars:'.$member->tchars.' s:'.$member->schars.' m:'.$member->mchars.' l:'.$member->lchars;
 			$message->system    = 1;
 			$message->timestamp = time();
 	
@@ -1006,8 +1021,6 @@ ON t4.userid = t5.userid');
 		else
 			$member->alert = null;
 	}
-	
-	//var_dump($wordCount);
 
 	return;
 }
@@ -1030,12 +1043,22 @@ function chat_format_message_theme ($message, $chatuser, $currentuser, $grouping
     $result = new stdClass();
 	$config = get_config('project');
 
-	//Added by Jeff Kurcz Apr 20, 2015 to check the last time an alert occurred for a specific user
-	$lastalert = $DB->get_record_sql('SELECT timestamp FROM mdl_chat_messages_current WHERE userid = ? AND system = 1 AND message LIKE ? ORDER BY timestamp DESC LIMIT 1', array($message->userid, 'alert%'))->timestamp;
-	//$timepassed = $lastalert+($config->alertsfreq*60); //Increase the time the last alert happened by X minutes as decided in settings. (Default is 10 mins).
-	//if($lastalert+60 < time() || !isset($lastalert)) //If last alert happened over 10 minutes or never happened, we can check for new alerts.
-	if($lastalert+($config->chatalertsfreq*60) < time() || !isset($lastalert)) //If last alert happened over 10 minutes or never happened, we can check for new alerts.
-		checkChatAlerts($chatuser);
+	$msgcount = $DB->get_record_sql("SELECT count(*) as msgcnt FROM `mdl_chat_messages_current` WHERE system = 0 AND groupid = ?", array($chatuser->groupid))->msgcnt;
+	$mbrcount = $DB->get_record_sql("SELECT count(*) as mbrcnt FROM `mdl_groups_members` WHERE groupid = ?", array($chatuser->groupid))->mbrcnt;
+
+	if($msgcount > $mbrcount*3){ //check to see if no alert has happened AND theres a little bit of conversation (3 times per # of group members) before analyzing
+		//Added by Jeff Kurcz Apr 20, 2015 to check the last time an alert occurred for a specific user
+		$lastalert = $DB->get_record_sql('SELECT substring(message,7,3) as alert, timestamp FROM `mdl_chat_messages_current` WHERE userid = ? AND system = 1 AND message LIKE ? ORDER BY timestamp DESC LIMIT 1', array($message->userid, 'alert%'));
+		if($lastalert->alert=='low')
+			$alert_type = 'lowchatalertsfreq';
+		else
+			$alert_type = 'highchatalertsfreq';
+			
+		$wait_until = ($lastalert->timestamp+($config->$alert_type*60));
+		if(time() > $wait_until || !isset($lastalert) ){ //If last alert happened over X minutes, we can check for new alerts.
+			checkChatAlerts($chatuser);
+		}//end if
+	}//end if
 	
     if (file_exists($CFG->dirroot . '/mod/chat/gui_ajax/theme/'.$theme.'/config.php')) {
         include($CFG->dirroot . '/mod/chat/gui_ajax/theme/'.$theme.'/config.php');
@@ -1465,7 +1488,7 @@ function chat_page_type_list($pagetype, $parentcontext, $currentcontext) {
 function getLowParticipators($groupid, $timestamp){
 	global $DB;
 	
-	$sql = 'SELECT userid FROM `mdl_chat_messages_current` WHERE groupid = '.$groupid.' AND timestamp BETWEEN '. ($timestamp-1) .' AND '. ($timestamp+1) .' AND message = "alert-low"'; 
+	$sql = 'SELECT userid FROM `mdl_chat_messages_current` WHERE groupid = '.$groupid.' AND timestamp BETWEEN '. ($timestamp-1) .' AND '. ($timestamp+1) .' AND message LIKE "alert-low%"'; 
 	$users =  $DB->get_records_sql($sql);
 	
 	$users_list = "";

@@ -61,6 +61,9 @@ $PAGE->set_url('/mod/project/history_view.php', array('id' => $cm->id));
 
 $options = empty($project->displayoptions) ? array() : unserialize($project->displayoptions);
 
+$PAGE->set_title($course->shortname.': '.$project->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_activity_record($project);
 
 /// Check to see if groups are being used here
 $groupmode = groups_get_activity_groupmode($cm);

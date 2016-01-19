@@ -48,6 +48,10 @@ require_capability('mod/project:view', $context);
 
 $PAGE->set_url('/mod/project/history_import.php', array('cmid' => $cmid));
 
+$PAGE->set_title($course->shortname.': '.$project->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_activity_record($project);
+
 $history = new stdClass();
 $summary = new stdClass();
 $history->id         = null;

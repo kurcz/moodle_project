@@ -48,6 +48,10 @@ require_capability('mod/project:view', $context);
 
 $PAGE->set_url('/mod/project/task_edit.php', array('cmid' => $cmid));
 
+$PAGE->set_title($course->shortname.': '.$project->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_activity_record($project);
+
 if ($taskid) {
     $task = $DB->get_record('project_task', array('id'=>$taskid), '*', MUST_EXIST);
 } else {
@@ -85,6 +89,7 @@ if ($mform->is_cancelled()) {
 			$comment->comment = $data->comments;
 
 			$DB->insert_record('project_feedback', $comment);
+			add_to_log($cm->course, 'project', 'comment', 'task_edit.php?id='.$cm->id, 'project '.$project->id.' task: '.$comment->task_id);
 		}
 		
 		

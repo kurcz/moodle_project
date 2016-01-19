@@ -48,6 +48,10 @@ require_capability('mod/project:view', $context);
 
 $PAGE->set_url('/mod/project/history_import_map.php', array('cmid' => $cmid));
 
+$PAGE->set_title($course->shortname.': '.$project->name);
+$PAGE->set_heading($course->fullname);
+$PAGE->set_activity_record($project);
+
 $history = new stdClass();
 $summary = new stdClass();
 $history->id         = null;
@@ -55,7 +59,17 @@ $history->cmid = $cm->id;
 
 //Check if names are in mapped table.
 //Get mapped users
-fillUsers($course->id, $currentgroup);
+$mapped_users = $DB->get_records('project_user_mapping', array('course_id'=>$course->id,'group_id'=>$currentgroup));
+//If no users are returned, array is empty, fill it with group members id's.
+if(empty($mapped_users)){
+	$fillempty->course_id = $course->id;
+	$fillempty->group_id = $currentgroup;
+	foreach($members as $member){
+		$fillempty->user_id = $member[0];
+		$fillempty->id = $DB->insert_record('project_user_mapping', $fillempty);
+	}
+	$mapped_users = $DB->get_records('project_user_mapping', array('course_id'=>$course->id,'group_id'=>$currentgroup)); //Recall the users
+}
 
 $user_map = array(); //Create the array
 //$user_map[0] = ""; //Add Blank option
