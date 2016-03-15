@@ -46,7 +46,7 @@ class task_edit_form extends moodleform {
 		$mform->addElement('html', 'Please select one of the following predefined tasks, or create one of your own. Hover over the link for the task description.<br /><br />');
 		//List all the predefined tasks
 		foreach($predefined_tasks as $pre_task){
-			$mform->addElement('html', '<a href="?cmid='.$task->cmid.'&pre='.$pre_task->id.'" >'.$pre_task->name.' --  '.$pre_task->hours.' hours</a><br />');
+			$mform->addElement('html', '<a href="?cmid='.$task->cmid.'&pre='.$pre_task->id.'" >'.$pre_task->name.'</a><br />');
 			}
 			$mform->addElement('html', '<a href="?cmid='.$task->cmid.'&pre=0" title="Create a Custom Task">Custom Task...</a><br />');
 		}
@@ -95,6 +95,7 @@ class task_edit_form extends moodleform {
 				}
 			}
 		}
+		
 		$mform->addGroupRule('members', 'Please assigned at least one member', 'required', null, 1);
 		
 		$mform->addElement('text', 'hours', get_string('hours', 'mod_project'), array('size'=>'2', 'maxlength'=>'4'));
@@ -118,12 +119,17 @@ class task_edit_form extends moodleform {
 		
         $mform->addElement('hidden', 'group_id', $project->currentgroup);
         $mform->setType('group_id', PARAM_INT);		
+		
 
 		$this->method = 'edit';
         $this->add_action_buttons(true);
-
+		
         // set the defaults
         $this->set_data($task);
+
+		if(isset($task->name)){
+			$mform->addElement('html', '<a href=task_edit.php?d=1&id='.$task->id.'&cmid='.$task->cmid.'>Delete Task</a>');
+		}
     }
 
     function definition_after_data(){
@@ -208,6 +214,7 @@ class task_view_form extends moodleform {
 		$task = $this->_customdata['task'];
 		$project = $this->_customdata['project'];
 		$members = $this->_customdata['members'];
+		//$attachmentoptions = $this->_customdata['attachmentoptions'];
 		
         $mform = $this->_form;
 		
@@ -262,8 +269,10 @@ class task_view_form extends moodleform {
 		
 		//TODO: Add File Picker to Tasks
 		$mform->addElement('header', 'files', get_string('files', 'mod_project'));
-		$mform->addElement('filepicker', 'userfile', get_string('file'), null, array('accepted_types' => '*'));
+		//$mform->addElement('filepicker', 'userfile', get_string('file'), null, array('accepted_types' => '*'));
 		$mform->setExpanded('files');
+		$mform->addElement('filemanager', 'attachment_filemanager', get_string('Attachments', 'mod_project'), null, array('accepted_types' => '*'));
+        //$mform->addHelpButton('attachment_filemanager', 'attachment', 'project');
 		
 		//Add User Feedback Comments to the tasks.
 		$mform->addElement('header', 'feedback', get_string('feedback', 'mod_project'));

@@ -128,7 +128,7 @@ $html .= "<table border=1 width=80%><tr><td style='vertical-align:top;'><table><
 
 		//If the task is complete, display a checkmark		
 		if($task->progress == 100) { 
-			$html .= "<img src='pix\Check_mark.png'' width='12px' height='12px' />";
+			$html .= "<img src='pix/Check_mark.png'' width='12px' height='12px' />";
 		}
 		//Display the task name, link and edit 
 		$html .= " Task: <a href='task_view.php?cmid=".$id."&id=".$id."&t=".$task->id."'>".$task->name ."</a> <a href='task_edit.php?cmid=".$id."&id=".$id."&t=".$task->id."'><img src='pix\settings.png'' width='12px' height='12px' /></a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For: ";

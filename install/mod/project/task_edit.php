@@ -31,6 +31,7 @@ require_once($CFG->dirroot.'/mod/project/locallib.php');
 $cmid       = required_param('cmid', PARAM_INT);  // Project Module ID
 $id      = optional_param('id', 0, PARAM_INT); // Course Module ID
 $taskid        = optional_param('t', 0, PARAM_INT); //Task ID  
+$d	  = optional_param('d', 0, PARAM_INT);
 
 $cm = get_coursemodule_from_id('project', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id'=>$cm->course), '*', MUST_EXIST);
@@ -51,6 +52,11 @@ $PAGE->set_url('/mod/project/task_edit.php', array('cmid' => $cmid));
 $PAGE->set_title($course->shortname.': '.$project->name);
 $PAGE->set_heading($course->fullname);
 $PAGE->set_activity_record($project);
+
+if($d && $id) {
+	$DB->delete_records('project_task', array('id'=>$id, 'group_id'=>$currentgroup));
+	redirect("view.php?id=".$cmid);
+}
 
 if ($taskid) {
     $task = $DB->get_record('project_task', array('id'=>$taskid), '*', MUST_EXIST);
