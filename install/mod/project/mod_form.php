@@ -48,13 +48,13 @@ class mod_project_mod_form extends moodleform_mod {
         }
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        $this->add_intro_editor($config->requiremodintro);
-
+        //$this->add_intro_editor($config->requiremodintro);
+		$this->add_intro_editor(true, get_string('forumintro', 'forum'));
 
         //-------------------------------------------------------
         $mform->addElement('header', 'appearancehdr', get_string('appearance'));
 
-        if ($this->current->instance) {
+        /*if ($this->current->instance) {
             $options = resourcelib_get_displayoptions(explode(',', $config->displayoptions), $this->current->display);
         } else {
             $options = resourcelib_get_displayoptions(explode(',', $config->displayoptions));
@@ -84,9 +84,9 @@ class mod_project_mod_form extends moodleform_mod {
             $mform->setType('popupheight', PARAM_INT);
             $mform->setDefault('popupheight', $config->popupheight);
         }
-
+		*/
         $mform->addElement('advcheckbox', 'printintro', get_string('printintro', 'project'));
-        $mform->setDefault('printintro', $config->printintro);
+        //$mform->setDefault('printintro', $config->printintro);
 
         // add legacy files flag only if used
         if (isset($this->current->legacyfiles) and $this->current->legacyfiles != RESOURCELIB_LEGACYFILES_NO) {

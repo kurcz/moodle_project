@@ -75,9 +75,11 @@ class task_edit_form extends moodleform {
 		
 		$mform->addElement('date_selector', 'start_date', get_string('task_start_date', 'mod_project'));
 		$mform->setType('start_date', PARAM_RAW);
+		$mform->addRule('start_date', null, 'required', null, 'client');
 		
 		$mform->addElement('date_selector', 'end_date', get_string('task_end_date', 'mod_project'));
 		$mform->setType('end_date', PARAM_RAW);
+		$mform->addRule('end_date', null, 'required', null, 'client');
 		
 		
 		$memberslist = array();

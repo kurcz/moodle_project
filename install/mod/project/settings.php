@@ -47,9 +47,9 @@ if ($ADMIN->fulltree) {
 	$settings->add(new admin_setting_configtext('project/cronrunfreq', get_string('cronrunfreq', 'project'), get_string('cronrunfreqexplain', 'project'), 7, PARAM_INT, 3));		
 	
 	$settings->add(new admin_setting_heading('thresholds', 'Thresholds', 'Set the thresholds that will activate the adaptive recommendations'));
-	$settings->add(new admin_setting_configtext('project/smallmsg', get_string('smallmsg', 'project'), get_string('smallmsgexplain', 'project'), 0.5, PARAM_RAW, 3));		
-	$settings->add(new admin_setting_configtext('project/largemsg', get_string('largemsg', 'project'), get_string('largemsgexplain', 'project'), 1.5, PARAM_RAW, 3));		
-	$settings->add(new admin_setting_configtext('project/lowthreshold', get_string('lowthreshold', 'project'), get_string('lowthresholdexplain', 'project'), 0.75, PARAM_RAW, 3));		
-	$settings->add(new admin_setting_configtext('project/highthreshold', get_string('highthreshold', 'project'), get_string('highthresholdexplain', 'project'), 1.25, PARAM_RAW, 3));	
+	$settings->add(new admin_setting_configtext('project/smallmsg', get_string('smallmsg', 'project'), get_string('smallmsgexplain', 'project'), 50, PARAM_RAW, 3));		
+	$settings->add(new admin_setting_configtext('project/largemsg', get_string('largemsg', 'project'), get_string('largemsgexplain', 'project'), 150, PARAM_RAW, 3));		
+	$settings->add(new admin_setting_configtext('project/lowthreshold', get_string('lowthreshold', 'project'), get_string('lowthresholdexplain', 'project'), 75, PARAM_RAW, 3));		
+	$settings->add(new admin_setting_configtext('project/highthreshold', get_string('highthreshold', 'project'), get_string('highthresholdexplain', 'project'), 125, PARAM_RAW, 3));	
 
 }

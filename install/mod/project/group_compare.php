@@ -132,6 +132,6 @@ $html .= "</table>";
 $content = $html;
 echo $OUTPUT->box($content, "generalbox center clearfix");
 
-add_to_log($course->id, 'project', 'group compare', 'group_compare.php?id='.$cmid, $p);
+add_to_log($course->id, 'project', 'view', 'group_compare.php?id='.$cmid, $p);
 
 echo $OUTPUT->footer();

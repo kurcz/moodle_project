@@ -1095,16 +1095,27 @@ function chat_format_message_theme ($message, $chatuser, $currentuser, $grouping
 		
 		//Added by Jeff Kurcz Apr 18, 2015 to check if system message is an alert.
 		if(substr($message->message, 0, 9) == 'alert-low') {
-			$event = get_string(substr($message->message, 0, 9), 'chat', fullname($sender));
+			//$event = get_string(substr($message->message, 0, 9), 'chat', $sender->firstname);
+			$event = '<b><u>ACS SYSTEM ALERT!</u></b><br />
+				'.$sender->firstname.', it seems that you have not contributed much to this discussion so far. <br /> 
+				For the group project to be successful, it is important that each team member contributes to the discussions. 
+				Try to share some ideas, concerns or thoughts with your team members!';
 			$eventmessage = new event_message(null, null, $message->strtime, $event, $theme);
 		}
 		else if(substr($message->message, 0, 10) == 'alert-high') {
-			$event = get_string(substr($message->message, 0, 10), 'chat', fullname($sender));
+			//$event = get_string(substr($message->message, 0, 10), 'chat', $sender->firstname);
 			//Get low participator names			
 			$low = getLowParticipators($chatuser->groupid, $message->timestamp);
+			$event1 = '<b><u>ACS SYSTEM ALERT!</u></b><br />
+				'.$sender->firstname.', you are contributing really a lot to this discussion! This is great! <br />
+				However, for the group project to be successful, it would be important to get other members\' ideas, concerns and thoughts as well. <br />
+				You would be a good leader for your group! Try to improve your leadership skills by trying to incorporate others in the discussion, especially';
 			if(strlen($low)>1)
-				$event .= "Such as: ".$low."<br />";
-			
+				$event2 = ' '.$low.' who is not participating as much!';
+			else
+				$event2 = ' those who are not participating as much!';
+				
+			$event = $event1 . " " .$event2;
 			$eventmessage = new event_message(null, null, $message->strtime, $event, $theme);
 		}
 		else{
@@ -1490,10 +1501,16 @@ function getLowParticipators($groupid, $timestamp){
 	
 	$sql = 'SELECT userid FROM `mdl_chat_messages_current` WHERE groupid = '.$groupid.' AND timestamp BETWEEN '. ($timestamp-1) .' AND '. ($timestamp+1) .' AND message LIKE "alert-low%"'; 
 	$users =  $DB->get_records_sql($sql);
+	$numUsers = count($users);
 	
 	$users_list = "";
+	$i = 0;
 	foreach($users as $userid => $user){
-		$users_list .= ucfirst(studentidToName($userid)).", ";
+		if(++$i === $numUsers) {
+			$users_list .= " and ". ucfirst(studentidToName($userid));
+		}
+		else
+			$users_list .= ucfirst(studentidToName($userid)).", ";
 	}//end for
 	return rtrim($users_list, ", ");
 

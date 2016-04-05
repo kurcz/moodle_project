@@ -199,7 +199,11 @@ if ($mform->is_cancelled()) {
 }
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string('Task Editing'), 2);
+if ($taskid)
+	echo $OUTPUT->heading(format_string('Task Editing'), 2);
+else
+	echo $OUTPUT->heading(format_string('Create a task'), 2);
+
 
 $mform->display();
 

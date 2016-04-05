@@ -299,5 +299,7 @@
     include_course_ajax($course, $modnamesused);
 
     echo $OUTPUT->footer();
-		
-	echo $OUTPUT->box(checkAlerts($USER->id, getGroupID($USER->id)));
+	
+	$groupid = getGroupID($USER->id);
+	if(isset($groupid[$USER->id]->groupid))
+		echo $OUTPUT->box(checkAlerts($USER->id, $groupid[$USER->id]->groupid));

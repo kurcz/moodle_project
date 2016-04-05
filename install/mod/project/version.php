@@ -30,4 +30,4 @@ $config = get_config('project');
 $module->version   = 2016011200;       // The current module version (Date: YYYYMMDDXX)
 $module->requires  = 2013110500;    // Requires this Moodle version
 $module->component = 'mod_project';       // Full name of the plugin (used for diagnostics)
-$module->cron      = $config->cronrunfreq;
+$module->cron      = 60;

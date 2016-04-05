@@ -90,7 +90,8 @@ foreach($member_rank as $key=>$member){
 		$html .= "<tr><td>".studentidToLMS_Name($key)."</td>";
 	$html .= "<td style='text-align:center;'>".$member."</td>";
 	$html .= "<td style='text-align:center;'''>".round($member/$total_hours*100,2)."</td>";
-	if(!empty(MemberWorkloadDistribution($member, $equal_hours))) //If distribution occus, display variance and icon.
+	$distribution = MemberWorkloadDistribution($member, $equal_hours);
+	if(!empty($distribution)) //If distribution occus, display variance and icon.
 		$html .= "<td style='text-align:center;color:crimson;'>".MemberWorkloadDistribution($member, $equal_hours)."  <img src='pix\alert_icon.png'' width='12px' height='12px'/></td>";
 	else
 		$html .= "<td></td>";

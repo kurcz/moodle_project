@@ -1,6 +1,6 @@
 Moodle Project Plugin
-Version: 1.0.4
-Build: 20160112
+Version: 1.0.8
+Build: 20160405
 Author: Jeff Kurcz
 
 This is a Moodle Plugin that provides a Project Activity and allows groups to collaborate on a project together with adaptivity to assist in a fair and positive learning experience. 

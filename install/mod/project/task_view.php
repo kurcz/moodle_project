@@ -58,7 +58,19 @@ if ($taskid) {
     $task = new stdClass();
     $task->id         = null;
 }
+
+$maxfiles = 99;                // TODO: add some setting
+$maxbytes = $course->maxbytes; // TODO: add some setting
+
+$definitionoptions = array('trusttext'=>true, 'maxfiles'=>$maxfiles, 'maxbytes'=>$maxbytes, 'context'=>$context,
+    'subdirs'=>file_area_contains_subdirs($context, 'mod_project', 'task', $task->id));
+$attachmentoptions = array('subdirs'=>false, 'maxfiles'=>$maxfiles, 'maxbytes'=>$maxbytes);
+
+//$task = file_prepare_standard_editor($task, 'definition', $definitionoptions, $context, 'mod_project', 'task', $task->id);
+$task = file_prepare_standard_filemanager($task, 'attachment', $attachmentoptions, $context, 'mod_project', 'attachment', $task->id);
+
 $task->cmid = $cm->id;
+
 
 
 $options = array('noclean'=>true, 'subdirs'=>true, 'maxfiles'=>-1, 'maxbytes'=>0, 'context'=>$context);
@@ -80,6 +92,10 @@ if ($mform->is_cancelled()) {
 			print_r($file);
 			$DB->insert_record('project_submitted_files', $file);
 		}*/
+				    // save and relink embedded images and save attachments
+  //  $entry = file_postupdate_standard_editor($entry, 'definition', $definitionoptions, $context, 'mod_project', 'entry', $entry->id);
+    //$entry = file_postupdate_standard_filemanager($entry, 'attachment', $attachmentoptions, $context, 'mod_project', 'attachment', $entry->id);
+
 		
 		if(!empty($data->comments)){
 			$comment = new stdClass();

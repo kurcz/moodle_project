@@ -79,6 +79,10 @@ if($isAdmin && empty($_GET['group']) ){
 		$adminpage .= "<a href='view.php?id=".$id."&group=".$group->id."'>".$group->name."<br />";
 	}
 }
+
+if(!$currentgroup){
+	$nogrouppage = 'You are currently not assigned to any group. Please check with your course professor.';
+}
 	
 
 // url parameters
@@ -108,7 +112,6 @@ $formatoptions->noclean = true;
 $formatoptions->overflowdiv = true;
 $formatoptions->context = $context;
 
-
 $members = array();
 $tasks = array();
 $members = getGroupMembers($currentgroup); //Get group members of the group, ID's and last access
@@ -118,7 +121,8 @@ $history = getGroupChatHistory($currentgroup); //Get Group chat history
 $html = ""; // Initiate blank HTML to create the screen.
 
 //Alert Section - When loading the module, check for any alerts for the user/group
-$html .= checkAlerts($USER->id, $currentgroup);
+if($currentgroup!=0) //make sure a student belongs to a group
+	$html .= checkAlerts($USER->id, $currentgroup);
 
 //Draw the screen
 //Left side is the project side, Start with listing all the tasks
@@ -131,7 +135,7 @@ $html .= "<table border=1 width=80%><tr><td style='vertical-align:top;'><table><
 			$html .= "<img src='pix/Check_mark.png'' width='12px' height='12px' />";
 		}
 		//Display the task name, link and edit 
-		$html .= " Task: <a href='task_view.php?cmid=".$id."&id=".$id."&t=".$task->id."'>".$task->name ."</a> <a href='task_edit.php?cmid=".$id."&id=".$id."&t=".$task->id."'><img src='pix\settings.png'' width='12px' height='12px' /></a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For: ";
+		$html .= " Task: <a href='task_view.php?cmid=".$id."&id=".$id."&t=".$task->id."'>".$task->name ."</a> <a href='task_edit.php?cmid=".$id."&id=".$id."&t=".$task->id."'><img src='pix/settings.png'' width='12px' height='12px' /></a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For: ";
 			//Find and display all the users assigned to the task
 			$name_size = count($name);
 			$name_count = 0;
@@ -165,7 +169,7 @@ if(count($tasks)>0){
 $workload_alert = AlertWorkloadDistribution($currentgroup);
 $html .= "<br/> <a href='workload_distribution.php?cmid=".$id."&p=".$project->id."' style='a:link{color: #f00;}' >Workload Distribution</a>"; //Display link
 if($workload_alert){
-	$html .= " <img src='pix\alert_icon.png'' width='12px' height='12px'/>"; //If alert is true, lets display an icon for attention
+	$html .= " <img src='pix/alert_icon.png'' width='12px' height='12px'/>"; //If alert is true, lets display an icon for attention
 }//end if there are alerts
 }//end if no tasks check
 
@@ -183,7 +187,7 @@ $html .= "<table><tr><td><u>Group Members</u></td><td><u>Last Online</u></td></t
 				$sendmessageurl->param('viewing', MESSAGE_VIEW_COURSE. $course->id);
 			}
 			if($USER->id != $members[$i][0]) { //IF user is not the current user, display message icon
-				$messagelink = "<a href='".$sendmessageurl."'><img src='pix\message.png'' width='12px' height='12px' /></a>";
+				$messagelink = "<a href='".$sendmessageurl."'><img src='pix/message.png'' width='12px' height='12px' /></a>";
 			}
 			else { //Otherwise do not display this icon.
 				$messagelink = "";
@@ -209,7 +213,7 @@ $html .= "<table><tr><td><u>Group Members</u></td><td><u>Last Online</u></td></t
 	if (has_capability('mod/chat:chat', $context)) {
 		$params['id'] = $chat->id;
 		$chattarget = new moodle_url("/mod/chat/gui_$CFG->chat_method/index.php", $params);
-		$html .= '<tr><td><img src="..\..\mod\chat\pix\icon.png" width="16px" height="16px"> ';
+		$html .= '<tr><td><img src="../../mod/chat/pix/icon.png" width="16px" height="16px"> ';
 		$html .= $OUTPUT->action_link($chattarget, $chat->name, new popup_action('click', $chattarget, "chat{$course->id}_{$chat->id}{$groupparam}", array('height' => 500, 'width' => 700))); //Create a link with a popout window for the chat.
 		$html .= '</td></tr>';
 		
@@ -222,7 +226,7 @@ $html .= displayForums();
 //Display the previous imported communication history
 $html .="</table><table><tr><td><u>Communication History</u><br/>";
 	foreach($history as $history_item) { //Iterate through each imported type and display icon, link with time.
-		$html .= "<img src='pix\\".$history_item->method.".png' width='16px' heigh='16px' /> <a href='history_view.php?id=".$history_item->id."&p=".$project->id."'>".userdate($history_item->date, get_string('strftimedatetime', 'langconfig'))."</a> <br />";
+		$html .= "<img src='pix/".$history_item->method.".png' width='16px' heigh='16px' /> <a href='history_view.php?id=".$history_item->id."&p=".$project->id."'>".userdate($history_item->date, get_string('strftimedatetime', 'langconfig'))."</a> <br />";
 	}
 	$html .= "<br/> <a href='history_import.php?cmid=".$id."'>+ Import</a>"; //Display a link to import more conversations
 
@@ -230,7 +234,9 @@ $html .="</table><table><tr><td><u>Communication History</u><br/>";
 
 $html .= "</table></table>";
 
-if(isset($adminpage))
+if($currentgroup==0 && !isset($adminpage))
+$content = $nogrouppage;
+else if(isset($adminpage))
 $content = $adminpage;
 else
 $content = $html;
