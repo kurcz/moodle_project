@@ -198,10 +198,10 @@ function getGroupMembersID($groupid){
  * return int groupid
  */
 function getGroupID($userid){
-	global $DB;
+	global $DB, $COURSE;
 	
 	//return $DB->get_records('groups_members', array('userid'=>$userid), 'groupid')->groupid;
-	return $DB->get_records_sql('SELECT userid,groupid FROM `mdl_groups_members` WHERE groupid IN (SELECT id FROM `mdl_groups` WHERE courseid = 2) AND userid = '.$userid.' LIMIT 1');
+	return $DB->get_records_sql('SELECT userid,groupid FROM `mdl_groups_members` WHERE groupid IN (SELECT id FROM `mdl_groups` WHERE courseid = '.$COURSE->id.') AND userid = '.$userid.' LIMIT 1');
 }
 
 /**
