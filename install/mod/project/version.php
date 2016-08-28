@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Page module version information
+ * List of all pages in course
  *
  * @package    mod
  * @subpackage project
- * @copyright  2009 Petr Skoda (http://skodak.org)
+ * @copyright  2016 onwards Jeffrey Kurcz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -16,13 +16,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * project module version information
+ * List of all pages in course
  *
  * @package    mod
  * @subpackage project
- * @copyright  2009 Petr Skoda (http://skodak.org)
+ * @copyright  2016 onwards Jeffrey Kurcz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 require('../../config.php');
 require_once($CFG->dirroot.'/mod/project/edit_form.php');
 require_once($CFG->dirroot.'/mod/project/locallib.php');
@@ -30,7 +31,7 @@ require_once($CFG->dirroot.'/mod/project/locallib.php');
 
 $cmid       = required_param('cmid', PARAM_INT);  // Project Module ID
 $id      = optional_param('id', 0, PARAM_INT); // Course Module ID
-$taskid        = optional_param('t', 0, PARAM_INT); //Task ID  
+$taskid        = optional_param('t', 0, PARAM_INT); //Task ID
 
 $cm = get_coursemodule_from_id('project', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id'=>$cm->course), '*', MUST_EXIST);
@@ -96,7 +97,7 @@ if ($mform->is_cancelled()) {
   //  $entry = file_postupdate_standard_editor($entry, 'definition', $definitionoptions, $context, 'mod_project', 'entry', $entry->id);
     //$entry = file_postupdate_standard_filemanager($entry, 'attachment', $attachmentoptions, $context, 'mod_project', 'attachment', $entry->id);
 
-		
+
 		if(!empty($data->comments)){
 			$comment = new stdClass();
 			$comment->time = time();
@@ -107,15 +108,15 @@ if ($mform->is_cancelled()) {
 			$DB->insert_record('project_feedback', $comment);
 			add_to_log($cm->course, 'project', 'comment', 'task_edit.php?id='.$cm->id, 'project '.$project->id.' task: '.$comment->task_id);
 		}
-		
-		
+
+
         //add_to_log($course->id, 'course', 'update mod', '../mod/project/view.php?id='.$cm->id, 'project '.$project->id);
         $params = array(
             'context' => $context,
             'objectid' => $data->id
         );
 
-    } 
+    }
     redirect("view.php?id=$cm->id");
 }
 

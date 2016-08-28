@@ -16,11 +16,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of functions and constants for module chat
+ * List of all pages in course
  *
- * @package   mod-chat
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    mod-chat
+ * @subpackage project
+ * @copyright  2016 onwards Jeffrey Kurcz
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once($CFG->dirroot.'/calendar/lib.php');
@@ -915,7 +916,7 @@ function chat_format_message($message, $courseid, $currentuser, $chat_lastrow=NU
 
 function checkChatAlerts($chatuser){
     global $DB, $CFG;
-	
+
 	$config = get_config('project');
 	$currentgroup = $chatuser->groupid;
 	sleep(1);
@@ -961,13 +962,13 @@ LEFT JOIN
 	WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) < '.$message_size->small.'
 	GROUP BY userid )t5
 ON t4.userid = t5.userid');
-	
+
 	$stats = new stdClass();
 	$stats = $DB->get_record_sql('SELECT SUM(LENGTH(message)) as Sum FROM `mdl_chat_messages_current` WHERE groupid = '.$currentgroup.'  AND system = 0 AND LENGTH(message) >  '.$message_size->small);
 	$stats->avg = $stats->sum/count($charCount);
 	$stats->low = $stats->avg * $config->lowthreshold;
 	$stats->high = $stats->avg * $config->highthreshold;
-	
+
 			//create alert object
 		$statsmsg = new stdclass();
 		$statsmsg->chatid = 0;
@@ -980,12 +981,12 @@ ON t4.userid = t5.userid');
 		//insert alert message to the database
 		$messageid = $DB->insert_record('chat_messages', $statsmsg);
 		$DB->insert_record('chat_messages_current', $statsmsg);
-	
+
 	//Iterate through all members of a chat and find any who has a word count lower or higher than the thresholds
 	foreach($charCount as $member) {
 		if($member->tchars < $stats->low){
 			$member->alert = "Low";
-			  
+
 			//Create alert object
 			$message = new stdClass();
 			$message->chatid    = $chatuser->chatid;
@@ -994,16 +995,16 @@ ON t4.userid = t5.userid');
 			$message->message   =  'alert-low totalchars:'.$member->tchars.' s:'.$member->schars.' m:'.$member->mchars.' l:'.$member->lchars;
 			$message->system    = 1;
 			$message->timestamp = time();
-	
+
 			//Insert alert message to the database
 			$messageid = $DB->insert_record('chat_messages', $message);
 			$DB->insert_record('chat_messages_current', $message);
 			$message->id = $messageid;
-			
+
 		}
 		else if($member->tchars > $stats->high){
 			$member->alert = "High";
-			
+
 			//Create alert object
 			$message = new stdClass();
 			$message->chatid    = $chatuser->chatid;
@@ -1012,8 +1013,8 @@ ON t4.userid = t5.userid');
 			$message->message   =  'alert-high totalchars:'.$member->tchars.' s:'.$member->schars.' m:'.$member->mchars.' l:'.$member->lchars;
 			$message->system    = 1;
 			$message->timestamp = time();
-	
-			//Insert alert message to the database	
+
+			//Insert alert message to the database
 			$messageid = $DB->insert_record('chat_messages', $message);
 			$DB->insert_record('chat_messages_current', $message);
 			$message->id = $messageid;
@@ -1053,13 +1054,13 @@ function chat_format_message_theme ($message, $chatuser, $currentuser, $grouping
 			$alert_type = 'lowchatalertsfreq';
 		else
 			$alert_type = 'highchatalertsfreq';
-			
+
 		$wait_until = ($lastalert->timestamp+($config->$alert_type*60));
 		if(time() > $wait_until || !isset($lastalert) ){ //If last alert happened over X minutes, we can check for new alerts.
 			checkChatAlerts($chatuser);
 		}//end if
 	}//end if
-	
+
     if (file_exists($CFG->dirroot . '/mod/chat/gui_ajax/theme/'.$theme.'/config.php')) {
         include($CFG->dirroot . '/mod/chat/gui_ajax/theme/'.$theme.'/config.php');
     }
@@ -1092,19 +1093,19 @@ function chat_format_message_theme ($message, $chatuser, $currentuser, $grouping
         $result->type = 'system';
 
         $senderprofile = $CFG->wwwroot.'/user/view.php?id='.$sender->id.'&amp;course='.$courseid;
-		
+
 		//Added by Jeff Kurcz Apr 18, 2015 to check if system message is an alert.
 		if(substr($message->message, 0, 9) == 'alert-low') {
 			//$event = get_string(substr($message->message, 0, 9), 'chat', $sender->firstname);
 			$event = '<b><u>ACS SYSTEM ALERT!</u></b><br />
-				'.$sender->firstname.', it seems that you have not contributed much to this discussion so far. <br /> 
-				For the group project to be successful, it is important that each team member contributes to the discussions. 
+				'.$sender->firstname.', it seems that you have not contributed much to this discussion so far. <br />
+				For the group project to be successful, it is important that each team member contributes to the discussions.
 				Try to share some ideas, concerns or thoughts with your team members!';
 			$eventmessage = new event_message(null, null, $message->strtime, $event, $theme);
 		}
 		else if(substr($message->message, 0, 10) == 'alert-high') {
 			//$event = get_string(substr($message->message, 0, 10), 'chat', $sender->firstname);
-			//Get low participator names			
+			//Get low participator names
 			$low = getLowParticipators($chatuser->groupid, $message->timestamp);
 			$event1 = '<b><u>ACS SYSTEM ALERT!</u></b><br />
 				'.$sender->firstname.', you are contributing really a lot to this discussion! This is great! <br />
@@ -1114,7 +1115,7 @@ function chat_format_message_theme ($message, $chatuser, $currentuser, $grouping
 				$event2 = ' '.$low.' who is not participating as much!';
 			else
 				$event2 = ' those who are not participating as much!';
-				
+
 			$event = $event1 . " " .$event2;
 			$eventmessage = new event_message(null, null, $message->strtime, $event, $theme);
 		}
@@ -1122,16 +1123,16 @@ function chat_format_message_theme ($message, $chatuser, $currentuser, $grouping
 			$event = get_string('message'.$message->message, 'chat', fullname($sender));
 			$eventmessage = new event_message($senderprofile, fullname($sender), $message->strtime, $event, $theme);
 		}
-		
+
         $output = $PAGE->get_renderer('mod_chat');
         $result->html = $output->render($eventmessage);
-		
+
 		//Added by Jeff Kurcz Apr 18, 2015 to only display alert to intended user.
 		if(substr($message->message, 0, 5) == 'alert' && $USER->id==$sender->id)
         return $result;
 		else
 		return false;
-		
+
     }
 
     // It's not a system event
@@ -1498,11 +1499,11 @@ function chat_page_type_list($pagetype, $parentcontext, $currentcontext) {
 
 function getLowParticipators($groupid, $timestamp){
 	global $DB;
-	
-	$sql = 'SELECT userid FROM `mdl_chat_messages_current` WHERE groupid = '.$groupid.' AND timestamp BETWEEN '. ($timestamp-1) .' AND '. ($timestamp+1) .' AND message LIKE "alert-low%"'; 
+
+	$sql = 'SELECT userid FROM `mdl_chat_messages_current` WHERE groupid = '.$groupid.' AND timestamp BETWEEN '. ($timestamp-1) .' AND '. ($timestamp+1) .' AND message LIKE "alert-low%"';
 	$users =  $DB->get_records_sql($sql);
 	$numUsers = count($users);
-	
+
 	$users_list = "";
 	$i = 0;
 	foreach($users as $userid => $user){

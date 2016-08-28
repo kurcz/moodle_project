@@ -16,11 +16,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * project configuration form
+ * List of all pages in course
  *
  * @package    mod
  * @subpackage project
- * @copyright  2009 Petr Skoda (http://skodak.org)
+ * @copyright  2016 onwards Jeffrey Kurcz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -86,7 +86,7 @@ $members = array();
 $tasks = array();
 $members = getGroupMembers($currentgroup); //Get group members of the group, ID's and last access
 
-$tasks = getGroupsTasks($currentgroup); 
+$tasks = getGroupsTasks($currentgroup);
 $html = "<a href='../chat/index.php?id=3'>Open Chat</a><br />";
 $html .= "<table border=1><tr><td style='vertical-align:top;'><u>List of Tasks</u><br /><br />+ <a href='task_create.php'>NEW</a><br /><br />";
 	foreach($tasks as $task){
@@ -103,7 +103,7 @@ $html .= "<table border=1><tr><td style='vertical-align:top;'><u>List of Tasks</
 		$html .= " Due: ".userdate($task->end_date);
 		$html .= "<br />";
 	}
-$html .= "</td><td style='vertical-align:top;'><td><td><u>Group Members</u><br /><br />"; 
+$html .= "</td><td style='vertical-align:top;'><td><td><u>Group Members</u><br /><br />";
 	for($i = 0; $i< count($members); $i++){
 		if((time() - $members[$i][2]) <= 100){
 			$html .= $members[$i][1]." <font style='color:green;font-weight:bold;'>Online Now</font><br />";

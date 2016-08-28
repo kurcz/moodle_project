@@ -18,8 +18,8 @@
  * Cron functions.
  *
  * @package    core
- * @subpackage admin
- * @copyright  1999 onwards Martin Dougiamas  http://dougiamas.com
+ * @subpackage project
+ * @copyright  2016 onwards Jeffrey Kurcz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -504,13 +504,13 @@ function cron_run() {
     require_once($CFG->dirroot . '/badges/cron.php');
     badge_cron();
     mtrace('done.');
-	
+
 	//Cron run Project Add Completed Groups to new table.
     mtrace("Starting Project cron...");
 	require_once($CFG->dirroot .'/mod/project/lib.php');
 	populate_completed_groups_cron();
 	mtrace('done.');
-	
+
 
     // cleanup file trash - not very important
     $fs = get_file_storage();

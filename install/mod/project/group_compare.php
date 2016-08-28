@@ -16,11 +16,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * project module version information
+ * List of all pages in course
  *
  * @package    mod
  * @subpackage project
- * @copyright  2009 Petr Skoda (http://skodak.org)
+ * @copyright  2016 onwards Jeffrey Kurcz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -94,7 +94,7 @@ foreach($groups as $group){ //Iterate through each group in the course
 	$group_rank[$group->id] = round($hours_complete/$total_hours*100); //Store rounded hours of the group progress.
 	$group_start[$group->id] = $start;
 	$group_end[$group->id] = $end;
-			
+
 }
 echo "<br />";
 
@@ -117,7 +117,7 @@ foreach($group_rank as $key=>$sorted_group){
 	else { //Otherwise more work has been done than time, good standing alert
 		$progress_bar_colour = "#0f0"; //Green
 	}
-	
+
 	if($key==$currentgroup) //If the student viewing page is in the group, bold their name.
 		$html .= "<tr><td><b>".getGroupName($key)."<b></td><td>";
 	else //Otherwise, just display the group name

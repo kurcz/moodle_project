@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * project module version information
+ * List of all pages in course
  *
  * @package    mod
  * @subpackage project
- * @copyright  2009 Petr Skoda (http://skodak.org)
+ * @copyright  2016 onwards Jeffrey Kurcz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -82,7 +81,7 @@ if(AlertWorkloadDistribution($currentgroup))
 	$html .= "<table style='border:1px solid black;'><tr style='background-color:lightgrey;'><th>Member</th><th>Assigned Hours</th><th>% of Workload</th><th>Variance</th></tr>";
 else
 	$html .= "<table style='border:1px solid black;'><tr style='background-color:lightgrey;'><th>Member</th><th>Assigned Hours</th><th>% of Workload</th><th></th></tr>";
-	
+
 foreach($member_rank as $key=>$member){
 	if($key==$USER->id) //Bold the current student
 		$html .= "<tr><td><b>".studentidToLMS_Name($key)."</b></td>";

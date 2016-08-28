@@ -16,9 +16,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * List of all pages in course
+ *
  * @package    mod
  * @subpackage project
- * @copyright  2009 Petr Skoda (http://skodak.org)
+ * @copyright  2016 onwards Jeffrey Kurcz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -188,7 +190,7 @@ function project_delete_instance($id) {
  */
 function getGroupMembersID($groupid){
 	global $DB;
-	
+
 	return $DB->get_records('groups_members',array('groupid'=>$groupid),null,'userid');
 }
 
@@ -199,7 +201,7 @@ function getGroupMembersID($groupid){
  */
 function getGroupID($userid){
 	global $DB, $COURSE;
-	
+
 	//return $DB->get_records('groups_members', array('userid'=>$userid), 'groupid')->groupid;
 	return $DB->get_records_sql('SELECT userid,groupid FROM `mdl_groups_members` WHERE groupid IN (SELECT id FROM `mdl_groups` WHERE courseid = '.$COURSE->id.') AND userid = '.$userid.' LIMIT 1');
 }
@@ -211,7 +213,7 @@ function getGroupID($userid){
  */
 function getGroupMembers($groupid){
 	global $DB, $COURSE;
-	
+
 	$members = array(); //Set a new array
 	$groupids = getGroupMembersID($groupid); //Get a list of users in a group
 	foreach($groupids as $studentid) { //For each of those users, iterate
@@ -222,9 +224,9 @@ function getGroupMembers($groupid){
 			$lastaccess->timeaccess = "0";
 			}
 		$student = array($studentid->userid, $studentname->username, $lastaccess->timeaccess); //Add user info to an array
-		array_push($members, $student); //Add to the array we will be returning. 
+		array_push($members, $student); //Add to the array we will be returning.
 		}
-		
+
 	return $members;
 }
 
@@ -235,14 +237,14 @@ function getGroupMembers($groupid){
  */
 function getStudentName($userid){
 		global $DB;
-		
+
 		$students = array(); //Set new blank array
 		$users = explode(',', $userid); //Exrract the string of users based on comma delimiter
 		for($i=0; $i<count($users); $i++){
-			$student = $DB->get_record('user',array('id'=>$users[$i]), 'username'); //Get the username of the studentid 
+			$student = $DB->get_record('user',array('id'=>$users[$i]), 'username'); //Get the username of the studentid
 			array_push($students, $student); //Add student name to array
 		}
-		
+
 		return $students;
 }
 
@@ -253,7 +255,7 @@ function getStudentName($userid){
 */
 function listGroups($course){
 	global $DB;
-	
+
 	return $DB->get_records('groups',array('courseid'=>$course),null, 'id,name');
 }
 
@@ -264,7 +266,7 @@ function listGroups($course){
  */
 function getGroupName($groupid){
 	global $DB;
-	
+
 	return $DB->get_record('groups',array('id'=>$groupid),'name')->name;
 }
 
@@ -275,14 +277,14 @@ function getGroupName($groupid){
  */
 function getStudentID($userid){
 		global $DB;
-		
+
 		$students = array();
 		$users = explode(',', $userid);
 		for($i=0; $i<count($users); $i++){
 			//$student = $DB->get_record('user',array('id'=>$users[$i]), 'username');
 			array_push($students, $users[$i]);
 		}
-		
+
 		return $students;
 }
 
@@ -293,7 +295,7 @@ function getStudentID($userid){
  */
 function getStudentFullName($userid){
 		global $DB;
-		
+
 		$students = array(); //Set new blank array
 		$users = explode(',', $userid);
 		for($i=0; $i<count($users); $i++){
@@ -302,7 +304,7 @@ function getStudentFullName($userid){
 			$student_fullname = $student_f; //Set their first name
 			array_push($students, $student_fullname);
 		}
-		
+
 		return $students;
 }
 
@@ -313,7 +315,7 @@ function getStudentFullName($userid){
  */
 function studentidToName($userid){
 	global $DB;
-	
+
 	return $DB->get_record('user',array('id'=>$userid),'username')->username;
 }
 
@@ -324,7 +326,7 @@ function studentidToName($userid){
  */
 function studentidToLMS_Name($userid){
 	global $DB;
-	
+
 	return ucwords($DB->get_record('user',array('id'=>$userid),'firstname')->firstname .' '.$DB->get_record('user',array('id'=>$userid),'lastname')->lastname);
 }
 
@@ -335,8 +337,8 @@ function studentidToLMS_Name($userid){
  */
 function getGroupsTasks($currentgroup){
 	global $DB;
-	
-	return $DB->get_records('project_task', array('group_id'=>$currentgroup), 'end_date');	
+
+	return $DB->get_records('project_task', array('group_id'=>$currentgroup), 'end_date');
 }
 
 /**
@@ -358,7 +360,7 @@ function displayGroupMembers($group){
  */
 function getMembersLastAccess($studentid, $courseid){
 	global $DB;
-	
+
 	return $DB->get_record('user_lastaccess',array('userid'=>$studentid, 'courseid'=>$courseid),'timeaccess');
 }
 
@@ -369,18 +371,18 @@ function getMembersLastAccess($studentid, $courseid){
  */
 function getGroupChatHistory($currentgroup) {
 	global $DB;
-	
+
 	return $DB->get_records('project_history_imp_summary', array('group_id' =>$currentgroup));
 }
 
 /**
  * Get user comments for a task
  * @param int taskid
- * return object of comments 
+ * return object of comments
  */
 function getUsersComments($task_id) {
 	global $DB;
-	
+
 	return $DB->get_records('project_feedback', array('task_id' => $task_id));
 }
 
@@ -424,14 +426,14 @@ function displayForums(){
 		}
 		//$html .= "<br />";
 	}
-	
+
 	return $html;
 }
 
 /**
  * Add users of a group the user mapping table
  * @param int courseid, int groupid
- * return 
+ * return
  */
 function fillUsers($courseid, $currentgroup){
 	global $DB;
@@ -460,7 +462,7 @@ function fillUsers($courseid, $currentgroup){
  */
 function RankMembersTasksDistribution($currentgroup){
 	global $DB;
-	
+
 	$groups_members = $DB->get_records('groups_members', array('groupid'=>$currentgroup)); //Get the members of a current group
 	$tasks = $DB->get_records('project_task', array('group_id'=>$currentgroup), '', 'id,members,hours'); //Get the tasks assigned to a group, return an array of task id, members assigned, and total hours
 
@@ -480,7 +482,7 @@ function RankMembersTasksDistribution($currentgroup){
 			}
 		}//end inner foreach
 		$member_rank[$member->userid] = $hours;
-		
+
 		$total_hours += $hours; //Add hours of a task to the overall
 	}//end outer foreach
 
@@ -501,7 +503,7 @@ function MemberWorkloadDistribution($hours, $equal_hours){
 	$distribution = (($hours - $equal_hours)/$equal_hours)*100;
 	if($distribution > 20 || $distribution < -20)
 		return round($distribution,0)."%";
-		
+
 }//end function MemberWorkloadDistribution
 
 /*
@@ -510,7 +512,7 @@ function MemberWorkloadDistribution($hours, $equal_hours){
 */
 function AlertWorkloadDistribution($group){
 	global $DB;
-	
+
 	$course = $DB->get_record('groups',array('id'=>$group),'courseid')->courseid;
 
 	$member_rank = RankMembersTasksDistribution($group);
@@ -518,7 +520,7 @@ function AlertWorkloadDistribution($group){
 	//Get the total number of hours based on each student
 	$total_hours = array_sum($member_rank);
 	$equal_hours = $total_hours/count($member_rank);
-	
+
 	if($total_hours==0)
 		return;
 	foreach($member_rank as $key=>$member){
@@ -529,7 +531,7 @@ function AlertWorkloadDistribution($group){
 			break;
 		}//end if
 	}//end foreach
-	
+
 }//end function AlertWorkloadDistribution
 
 /*
@@ -543,7 +545,7 @@ function getCurrentGroupProgress($group){
 	$tasks = $DB->get_records('project_task', array('group_id'=>$group), '', 'id,name,hours,progress,start_date,end_date');
 	if(!$tasks)
 		return "0/0";
-	
+
 	foreach($tasks as $task){
 		//Find the earliest start time, not set OR new start is sooner
 		if($start==0 || $task->start_date<$start){
@@ -558,7 +560,7 @@ function getCurrentGroupProgress($group){
 	}
 
 	$group_progress = round($hours_complete/$total_hours*100); //Store rounded hours of the group progress.
-	
+
 	//Find how many days between the first task and the last task
 	$total_days = ($end - $start)/(60*60*24);
 	//Find how many days into the project a group is
@@ -566,7 +568,7 @@ function getCurrentGroupProgress($group){
 
 	//Find out what the percentage of time done is.
 	$time_done = round(($days_in / $total_days)*100,0);
-	
+
 	return $group_progress."/".$time_done;
 }
 
@@ -577,23 +579,23 @@ function getCurrentGroupProgress($group){
  */
 function checkAlerts($userid, $currentgroup){
 	global $CFG, $COURSE, $DB;
-	
+
 	//Get config alert thresholds
 	$config = get_config('project');
 	$html = ""; //start blank new html
-	
+
 	//get an object of the current user and any potential alerts that may have lapsed.
 	$alerts = $DB->get_record('project_user_mapping', array('user_id'=>$userid), 'id,user_id,group_id,meetings_attended,meetings_total,meeting_alert,cohort_alert,forum_alert,import_alert');
 
 	if($alerts){
-	
+
 	if($alerts->cohort_alert+($config->prevcohortalertsfreq) < time() || $alerts->cohort_alert==0 )
 		checkPreviousCohorts($COURSE, $currentgroup);
 	if($alerts->forum_alert+($config->lowforumalertsfreq*60*60*24) < time() || $alerts->forum_alert+($config->highforumalertsfreq*60*60*24) < time() || $alerts->forum_alert==0 )
 		checkForumParticpation($currentgroup, $alerts);
 	if($alerts->import_alert+($config->lowimportalertsfreq*60*60*24) < time() || $alerts->import_alert+($config->highimportalertsfreq*60*60*24) < time() || $alerts->import_alert==0 )
 		checkImportedParticpation($currentgroup, $alerts);
-	
+
 	//Make sure there has been at least 1 meeting, otherwise divide by zero error.
 	if($alerts->meetings_total>0){
 	//If meetings attended is <= 50% and they have not been previously alerted since the last meeting, prompt the user.
@@ -619,23 +621,23 @@ function checkAlerts($userid, $currentgroup){
 			  </script>';
 			 //Set a flag to true that the user has been alerted to not allow for repeat alerts until the next meeting.
 			$DB->set_field('project_user_mapping', 'meeting_alert', 1, array('user_id'=>$userid));
-			
+
 			add_to_log($COURSE->id, 'project', 'alert', 'meeting attendance '.$alerts->meetings_attended.'/'.$alerts->meetings_total);
-	}//End check 
+	}//End check
 	}//end if meetings > 0
 	}//end if alerts true
-	
+
 	return $html;
 }
 
 /**
  * Check previous courses for their progress at a specific point in time
  * @param object course, int currentgroup
- * return string html 
+ * return string html
  */
 function checkPreviousCohorts($course, $currentgroup){
 	global $CFG, $DB, $USER;
-	
+
 	$config = get_config('project');
 
 	//See if values exist in table, otherwise we don't continue the check
@@ -653,11 +655,11 @@ function checkPreviousCohorts($course, $currentgroup){
 	$record->progress_percentage = $progress[0];
 	//echo "time: ".$record->time_percentage;
 	//echo "prog: ".$record->progress_percentage;
-	
+
 	//Get a list of groups with grades for both passed and failed
 	$passed_groups = $DB->get_records('project_completed_groups', array('pass'=>1), null, 'group_id');
 	$failed_groups = $DB->get_records('project_completed_groups', array('pass'=>0), null, 'group_id');
-	
+
 	//If there are no failed groups and no passed groups, this will not work and through an exception, so we will return
 	if(empty($failed_groups) && empty($passed_groups))
 			return;
@@ -673,7 +675,7 @@ function checkPreviousCohorts($course, $currentgroup){
 		$num_failed++;
 	}
 		//Get the average by adding all progress and dividing by the number of groups
-		$avg_failed = round(array_sum($failed_progress)/count($failed_progress));	
+		$avg_failed = round(array_sum($failed_progress)/count($failed_progress));
 		$max_failed = max($failed_progress);
 		//echo "<br />avg fail: ".$avg_failed;
 		//echo "<br />max fail: ".$max_failed;
@@ -685,7 +687,7 @@ function checkPreviousCohorts($course, $currentgroup){
 		$count_cohorts = $DB->count_records('project_previous_cohorts', array('group_id' => $group,'time_percentage'=>$record->time_percentage));
 		if(empty($count_cohorts))
 			return;
-			
+
 		//Select the highest average percentage of work done from table
 		$passed_progress[$num_passed] = $DB->get_record_sql('SELECT progress_percentage FROM mdl_project_previous_cohorts WHERE group_id = :group_id AND time_percentage = :time ORDER BY progress_percentage ASC LIMIT 1', array('group_id' => $group,'time'=>$record->time_percentage))->progress_percentage;
 		$num_passed++;
@@ -695,7 +697,7 @@ function checkPreviousCohorts($course, $currentgroup){
 		$min_passed = min($passed_progress);
 		//echo "<br />avg pass: ".$avg_passed;
 		//echo "<br />min pass: ".$min_passed;
-		
+
 	//Determine if a group is at risk of failure
 
 	//echo $record->progress_percentage."<br />";
@@ -703,13 +705,13 @@ function checkPreviousCohorts($course, $currentgroup){
 	//Get the project ID for the future link
 	$projectid = $DB->get_record_sql('SELECT id FROM `mdl_course_modules` WHERE module = (SELECT id FROM `mdl_modules` WHERE name = \'project\') AND course = :course ', array('course'=>$course->id))->id;
 
-	//If a current groups progress is greater than the maximum failure, there is no risk. 
+	//If a current groups progress is greater than the maximum failure, there is no risk.
 	if($record->progress_percentage > $max_failed){
 		return;
 	}
-	
+
 	//If a current groups progress is less than the minimum passing grade, they are absolutely at risk (very high)
-	if($record->progress_percentage < $min_passed){			
+	if($record->progress_percentage < $min_passed){
 		$cohort_alert = $DB->get_record('project_user_mapping', array('user_id'=>$USER->id), 'cohort_alert')->cohort_alert;
 
 		$html = '<div style="border:1px dashed black;width:80%;background:#FFFFD1;">
@@ -732,7 +734,7 @@ function checkPreviousCohorts($course, $currentgroup){
 				Your group\'s progress is currently at <b>'.$record->progress_percentage.'%</b> and the time into your project is '.$record->time_percentage.'%.<br /><br />
 				Your group is at very high risk of failing the project because <b>'.count($failed_progress).'</b> groups from previous cohorts<br />
 				had the same amount of work done at this time and failed. <br /><br />
-				To improve your group\'s risk level, you need to complete at least <b>'.($min_passed-$record->progress_percentage).'%</b> more of your project.<br /><br />			
+				To improve your group\'s risk level, you need to complete at least <b>'.($min_passed-$record->progress_percentage).'%</b> more of your project.<br /><br />
 				We recommend visiting <u><a href="'.$CFG->wwwroot.'/mod/project/view.php?id='.$projectid.'">your project</a></u>.<br />
 			  </p>
 			</div>
@@ -747,16 +749,16 @@ function checkPreviousCohorts($course, $currentgroup){
 				  }
 				});
 			  });
-			  </script>';	
-			  
+			  </script>';
+
 		//Set a flag with a timestamp so that the user has been alerted to not allow for repeat alerts until a later time if action has not been corrected.
 		$DB->set_field('project_user_mapping', 'cohort_alert', time(), array('user_id'=>$USER->id));
 		}//end cohort pop time check
-			  
+
 		add_to_log($course->id, 'project', 'alert', 'very high risk');
 		echo $html;
 	}
-	
+
 	//If a current groups progress is between min passing and max failure, we need to determine the risk level of failure.
 	if($record->progress_percentage >= $min_passed && $record->progress_percentage <= $max_failed){
 		$cohort_alert = $DB->get_record('project_user_mapping', array('user_id'=>$USER->id), 'cohort_alert')->cohort_alert;
@@ -769,7 +771,7 @@ function checkPreviousCohorts($course, $currentgroup){
 				Your group\'s project progress is currently at <b>'.$record->progress_percentage.'%</b> and the time into your project is '.$record->time_percentage.'%.<br />
 				Your group is at high risk of failing the project because <b>'.count($failed_progress).'</b> groups from previous cohorts had the same amount of work done at this time and failed. To improve your group\'s risk level, you need to complete at least <b>'.($min_passed-$record->progress_percentage).'%</b> more of your project.
 			</div>';
-			
+
 			//Check if last popup was X seconds ago from settings.php
 			if($cohort_alert+($config->prevcohortalertsfreq*60) < time()){
 			$html .= '<div id="dialog-message" title="High Risk Progress Alert!">
@@ -782,7 +784,7 @@ function checkPreviousCohorts($course, $currentgroup){
 				Your group\'s project progress is currently at <b>'.$record->progress_percentage.'%</b> and the time into your project is '.$record->time_percentage.'%.<br /><br />
 				Your group is at high risk of failing the project because <b>'.count($failed_progress).'</b> groups from previous cohorts<br />
 				had the same amount of work done at this time and failed. <br /><br />
-				To improve your group\'s risk level, you need to complete at least <b>'.($min_passed-$record->progress_percentage).'%</b> more of your project.<br /><br />			
+				To improve your group\'s risk level, you need to complete at least <b>'.($min_passed-$record->progress_percentage).'%</b> more of your project.<br /><br />
 				We recommend visiting <u><a href="'.$CFG->wwwroot.'/mod/project/view.php?id='.$projectid.'">your project</a></u>.<br />
 			  </p>
 			</div>
@@ -797,18 +799,18 @@ function checkPreviousCohorts($course, $currentgroup){
 				  }
 				});
 			  });
-			  </script>';	
-			  
+			  </script>';
+
 		//Set a flag with a timestamp so that the user has been alerted to not allow for repeat alerts until a later time if action has not been corrected.
 		$DB->set_field('project_user_mapping', 'cohort_alert', time(), array('user_id'=>$USER->id));
 
 		}//end cohort pop time check
-		
+
 		add_to_log($course->id, 'project', 'alert', 'high risk');
 		echo $html;
-				
+
 		}
-		
+
 		//Low risk if the progress is greater than the average amount of work of successful groups
 		if($record->progress_percentage > $avg_passed){
 			$html = '
@@ -817,13 +819,13 @@ function checkPreviousCohorts($course, $currentgroup){
 				<span id="title" style="margin:auto;"> Low Risk Progress Alert</span><br />
 				Your group\'s project progress is currently at <b>'.$record->progress_percentage.'%</b> and the time into your project is '.$record->time_percentage.'%.<br />
 				Your group is at low risk of failing the project because <b>'.count($failed_progress).'</b> groups from previous cohorts had the same amount of work done at this time and failed. To improve your group\'s risk level, you need to complete at least <b>'.($min_passed-$record->progress_percentage).'%</b> more of your project.
-			</div>';	
-		
+			</div>';
+
 		add_to_log($course->id, 'project', 'alert', 'low risk');
 		echo $html;
-				
+
 		}
-		
+
 		//Medium risk if the progress is between the average amount of work of failed and successful groups
 		if($record->progress_percentage >= $avg_failed && $record->progress_percentage <= $avg_passed){
 			$html = '
@@ -832,13 +834,13 @@ function checkPreviousCohorts($course, $currentgroup){
 				<span id="title" style="margin:auto;"> Medium Risk Progress Alert</span><br />
 				Your group\'s project progress is currently at <b>'.$record->progress_percentage.'%</b> and the time into your project is '.$record->time_percentage.'%.<br />
 				Your group is at medium risk of failing the project because <b>'.count($failed_progress).'</b> groups from previous cohorts had the same amount of work done at this time and failed. To improve your group\'s risk level, you need to complete at least <b>'.($min_passed-$record->progress_percentage).'%</b> more of your project.
-			</div>';	
-		
+			</div>';
+
 		add_to_log($course->id, 'project', 'alert', 'medium risk');
 		echo $html;
 		}
 	}
-		
+
 }
 
 /*Function to determine participation levels of forum users*/
@@ -861,7 +863,7 @@ LEFT JOIN `mdl_forum_discussions` t2
 	$message->size_small =  $averages->avgmsgsize*($config->smallmsg/100);
 	$message->size_medium = $averages->avgmsgsize*1.0;
 	$message->size_large =  $averages->avgmsgsize*($config->largemsg/100);
-	
+
 		$charCount = new stdClass();
 	$charCount = $DB->get_records_sql('SELECT t0.userid, coalesce(Schar,0) as Schar, coalesce(Mchar,0) as Mchar, coalesce(Lchar,0) as Lchar, coalesce(Tchar,0) as Tchar
 FROM
@@ -872,7 +874,7 @@ LEFT JOIN
 	FROM `mdl_forum_posts` t1
 	LEFT JOIN `mdl_forum_discussions` t2
 	ON t2.id = t1.discussion
-	WHERE t2.groupid = '.$currentgroup.' AND length(message) < '.$message->size_small.' 
+	WHERE t2.groupid = '.$currentgroup.' AND length(message) < '.$message->size_small.'
 	GROUP BY t1.userid) t3
 ON t0.userid = t3.userid
 LEFT JOIN
@@ -880,7 +882,7 @@ LEFT JOIN
 	FROM `mdl_forum_posts` t4
 	LEFT JOIN `mdl_forum_discussions` t5
 	ON t5.id = t4.discussion
-	WHERE t5.groupid = '.$currentgroup.' AND length(message) BETWEEN '.$message->size_small.'  AND '.$message->size_large.' 
+	WHERE t5.groupid = '.$currentgroup.' AND length(message) BETWEEN '.$message->size_small.'  AND '.$message->size_large.'
 	GROUP BY t4.userid) t6
 ON t0.userid = t6.userid
 LEFT JOIN
@@ -888,7 +890,7 @@ LEFT JOIN
 	FROM `mdl_forum_posts` t7
 	LEFT JOIN `mdl_forum_discussions` t8
 	ON t8.id = t7.discussion
-	WHERE t8.groupid = '.$currentgroup.' AND length(message) > '.$message->size_large.' 
+	WHERE t8.groupid = '.$currentgroup.' AND length(message) > '.$message->size_large.'
 	GROUP BY t7.userid) t9
 ON t0.userid = t9.userid
 LEFT JOIN
@@ -896,11 +898,11 @@ LEFT JOIN
 	FROM `mdl_forum_posts` t10
 	LEFT JOIN `mdl_forum_discussions` t11
 	ON t11.id = t10.discussion
-	WHERE t11.groupid = '.$currentgroup.' AND length(message) >= '.$message->size_small.' 
+	WHERE t11.groupid = '.$currentgroup.' AND length(message) >= '.$message->size_small.'
 	GROUP BY t10.userid) t12
 ON t0.userid = t12.userid
 GROUP BY t0.userid');
-	
+
 	$stats = new stdClass();
 	$stats = $DB->get_record_sql('SELECT sum(coalesce(t1.msgchars,0)) as sum
 FROM
@@ -909,18 +911,18 @@ LEFT JOIN
 	(SELECT t1.userid, sum(length(message)) as msgchars FROM `mdl_forum_posts` t1
 LEFT JOIN `mdl_forum_discussions` t2
 	ON t2.id = t1.discussion
-	WHERE t2.groupid = '.$currentgroup.' AND length(message) > '.$message->size_small.' 
+	WHERE t2.groupid = '.$currentgroup.' AND length(message) > '.$message->size_small.'
 	GROUP BY t1.userid) t1
 	ON t4.userid = t1.userid');
-	
+
 	//Get number of group members
 	$numMembers = $DB->count_records('groups_members', array('groupid'=>$currentgroup));
-	
+
 	$stats->avg = $stats->sum/$numMembers;
 	$stats->low = $stats->avg * ($config->lowthreshold / 100);
 	$stats->high = $stats->avg * ($config->highthreshold / 100);
 	//var_dump($stats);
-	
+
 	$low_participators = array();
 	foreach($charCount as $member) {
 		if($member->tchar < $stats->low){
@@ -931,14 +933,14 @@ LEFT JOIN `mdl_forum_discussions` t2
 		} else
 			$member->alert = null;
 	}
-	
+
 	//$charCount[$USER->id]->alert = "High";
 	//var_dump($charCount);
-	
+
 	if(!empty($charCount[$USER->id]->alert)){
 		if($charCount[$USER->id]->alert == "High"){
 			if($alerts->forum_alert+($config->highforumalertsfreq*60*60*24) > time())
-				return;	
+				return;
 			$msg = $USER->firstname.", you are contributing really a lot to the group forums! This is great! <br /><br />
 				However, for the group project to be successful, it would be important to get other members' ideas, concerns and thoughts as well. <br /><br />
 				You would be a good leader for your group! Try to improve your leadership skills by trying to incorporate others in the discussion, especially ";
@@ -950,7 +952,7 @@ LEFT JOIN `mdl_forum_discussions` t2
 		else{
 			if($alerts->forum_alert+($config->lowforumalertsfreq*60*60*24) > time())
 				return;
-				
+
 			$msg = $USER->firstname.", it seems that you have not contributed much to the group forums so far. <br /><br />
 			For the group project to be successful, it is important that each team member contributes to the discussions. Try to share some ideas, concerns or thoughts with your team members by posting to the discussion forum! <br /><br />
 			You can access the current discussions here: ";
@@ -974,15 +976,15 @@ LEFT JOIN `mdl_forum_discussions` t2
 				  }
 				});
 			  });
-			  </script>';	
-	
+			  </script>';
+
 	add_to_log($COURSE->id, 'project', 'alert-forum', $charCount[$USER->id]->alert);
 	echo $html;
-	
+
 	$DB->set_field('project_user_mapping', 'forum_alert', time(), array('user_id'=>$USER->id));
 
 	}//end if alert check
-	
+
 }//end function forum participator
 
 /*Third party import chat participation check and alert function*/
@@ -999,13 +1001,13 @@ function checkImportedParticpation($currentgroup, $alerts){
 	 ON t2.user = t1.skype
 	 WHERE group_id = '.$currentgroup.'
 	 ) t3');
-		
+
 	$config = get_config('project');
 	$message = new stdClass();
 	$message->size_small =  $averages->avgmsgsize * ($config->smallmsg / 100);
 	$message->size_medium = $averages->avgmsgsize*1.0;
 	$message->size_large =  $averages->avgmsgsize * ($config->largemsg / 100);
-		
+
 	$charCount = new stdClass();
 	$charCount = $DB->get_records_sql('SELECT userid, coalesce(Schar,0) as Schar, coalesce(Mchar,0) as Mchar, coalesce(Lchar,0) as Lchar, coalesce(Tchar,0) as Tchar FROM
 	(SELECT userid FROM `mdl_groups_members` WHERE groupid = '.$currentgroup.' ) t0
@@ -1014,7 +1016,7 @@ function checkImportedParticpation($currentgroup, $alerts){
 	`mdl_project_history_imp_detail`  t1
 	LEFT JOIN `mdl_project_user_mapping` t2
 	 ON t1.user = t2.skype
-	 WHERE group_id = '.$currentgroup.' AND length(message) < '.$message->size_small.' 
+	 WHERE group_id = '.$currentgroup.' AND length(message) < '.$message->size_small.'
 	 GROUP BY user_id) t3
 	 ON t0.userid = t3.user_id
 	 LEFT JOIN
@@ -1022,7 +1024,7 @@ function checkImportedParticpation($currentgroup, $alerts){
 	`mdl_project_history_imp_detail`  t4
 	LEFT JOIN `mdl_project_user_mapping` t5
 	 ON t4.user = t5.skype
-	 WHERE group_id = '.$currentgroup.' AND length(message) BETWEEN '.$message->size_small.'  AND '.$message->size_large.' 
+	 WHERE group_id = '.$currentgroup.' AND length(message) BETWEEN '.$message->size_small.'  AND '.$message->size_large.'
 	 GROUP BY user_id) t6
 	 ON t0.userid = t6.user_id
 	  LEFT JOIN
@@ -1030,7 +1032,7 @@ function checkImportedParticpation($currentgroup, $alerts){
 	`mdl_project_history_imp_detail`  t7
 	LEFT JOIN `mdl_project_user_mapping` t8
 	 ON t7.user = t8.skype
-	 WHERE group_id = '.$currentgroup.' AND length(message) > '.$message->size_large.' 
+	 WHERE group_id = '.$currentgroup.' AND length(message) > '.$message->size_large.'
 	 GROUP BY user_id) t9
 	 ON t0.userid = t9.user_id
 	  LEFT JOIN
@@ -1038,10 +1040,10 @@ function checkImportedParticpation($currentgroup, $alerts){
 	`mdl_project_history_imp_detail`  t10
 	LEFT JOIN `mdl_project_user_mapping` t11
 	 ON t10.user = t11.skype
-	 WHERE group_id = '.$currentgroup.' AND length(message) >= '.$message->size_small.' 
+	 WHERE group_id = '.$currentgroup.' AND length(message) >= '.$message->size_small.'
 	 GROUP BY user_id) t12
 	 ON t0.userid = t12.user_id');
-	 
+
 	$stats = new stdClass();
 	$stats = $DB->get_record_sql('SELECT sum(coalesce(t3.msgchars,0)) as sum
 		FROM
@@ -1053,25 +1055,25 @@ function checkImportedParticpation($currentgroup, $alerts){
 		 ON t2.user = t1.skype
 		 WHERE group_id = '.$currentgroup.'
 		 ) t3');
-		
+
 		//Get number of group members
 		$numMembers = $DB->count_records('groups_members', array('groupid'=>$currentgroup));
-		
+
 		$stats->avg = $stats->sum/$numMembers;
 		$stats->low = $stats->avg * ($config->lowthreshold / 100);
 		$stats->high = $stats->avg * ($config->highthreshold / 100);
-		
+
 		$low_participators = array();
 		foreach($charCount as $member) {
 			if($member->tchar < $stats->low) {
 				$member->alert = "Low";
-				$low_participators[$member->userid] = studentidToName($member->userid);	
+				$low_participators[$member->userid] = studentidToName($member->userid);
 			} else if($member->tchar > $stats->high)
 				$member->alert = "High";
 			else
 				$member->alert = null;
 		}
-			
+
 	if(!empty($charCount[$USER->id]->alert)){
 		$msg = "";
 		if($charCount[$USER->id]->alert == "High"){
@@ -1087,7 +1089,7 @@ function checkImportedParticpation($currentgroup, $alerts){
 			$msg .= rtrim(displayUsersAsText($low_participators),", ");
 			$msg .= " who is not participating as much!";
 			$alert_icon = "info.png";
-			
+
 		}
 		else{
 			if($alerts->import_alert+($config->lowimportalertsfreq*60*60*24) > time())
@@ -1116,13 +1118,13 @@ function checkImportedParticpation($currentgroup, $alerts){
 				  }
 				});
 			  });
-			  </script>';	
-	
+			  </script>';
+
 	add_to_log($COURSE->id, 'project', 'alert-skype', $charCount[$USER->id]->alert);
 	echo $html;
-	
+
 	$DB->set_field('project_user_mapping', 'import_alert', time(), array('user_id'=>$USER->id));
-	
+
 	}//end if alert check
 }
 
@@ -1130,8 +1132,8 @@ function checkImportedParticpation($currentgroup, $alerts){
 /*Go through grades table and find new groups that have finished a course and add them to our new table.*/
 function populate_completed_groups_cron(){
 	global $DB, $COURSE;
-	
-	//Run for all courses that have project 
+
+	//Run for all courses that have project
 	$all_projects = $DB->get_records('project');
 	$failed = 0;
 	foreach($all_projects as $project){
@@ -1143,12 +1145,12 @@ function populate_completed_groups_cron(){
 	$grade_id = $DB->get_record('grade_items', array('courseid'=>$project->course,'itemtype'=>'course'), 'id')->id;
 	//Get the users who have a final grade
 	$users_grade = $DB->get_records_sql('SELECT userid,finalgrade FROM mdl_grade_grades WHERE itemid = :itemid', array('itemid' => $grade_id));
-	
+
 	if(empty($users_grade)){ //If no grades exist, lets stop checking
 		mtrace('No grades...exiting...');
 		break;
 	}
-	
+
 	//get the group for each user with a final grade
 	foreach($users_grade as $uid=>$user){
 		$group_id = $DB->get_records('groups_members', array('userid'=>$uid), null, 'groupid');
@@ -1158,7 +1160,7 @@ function populate_completed_groups_cron(){
 		}
 
 	}
-	
+
 	//get the average grade per group
 	foreach($grades as $key=>$group){
 	$total_grade = $average_grade = 0;
@@ -1169,11 +1171,11 @@ function populate_completed_groups_cron(){
 		}
 		$groups_avg[$key] = $total_grade/count($group);
 	}
-	
+
 	$new_groups = array_diff_key($groups_avg, $completed_groups);
-	
+
 	if(!empty($new_groups)) {
-	
+
 		foreach($new_groups as $group=>$grade){
 			if($grade<51){
 				$DB->execute('INSERT INTO mdl_project_completed_groups (course_id, group_id, pass, lastmodified) VALUES ('.$project->course.', '.$group.', 0, '.time().')');
@@ -1182,21 +1184,21 @@ function populate_completed_groups_cron(){
 				$DB->execute('INSERT INTO mdl_project_completed_groups (course_id, group_id, pass, lastmodified) VALUES ('.$project->course.', '.$group.', 1, '.time().')');
 			}
 		}//end for each
-	
+
 	} //End if not empty new_groups array
-	
+
     mtrace('  Added complete groups to table...');
 	}//end for each of all courses that have a project
-	
+
 	mtrace('Finished project');
 	add_to_log('1', 'project', 'cron run', '');
 
-	
+
 }
 
 function project_cron() {
     //global $CFG;
-	
+
     //require_once($CFG->dirroot . '/mod/project/cronlib.php');
     mtrace('');
 	mtrace('Project...');

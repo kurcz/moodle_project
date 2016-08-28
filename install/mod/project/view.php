@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,13 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * project module version information
+ * List of all pages in course
  *
  * @package    mod
  * @subpackage project
- * @copyright  2009 Petr Skoda (http://skodak.org)
+ * @copyright  2016 onwards Jeffrey Kurcz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 require('../../config.php');
 require_once($CFG->dirroot.'/mod/project/locallib.php');
 //require_once($CFG->libdir.'/completionlib.php');
@@ -70,7 +70,7 @@ $currentgroup = groups_get_activity_group($cm, true);
 //var_dump($USER);
 if(isset($_GET['group']) && $isAdmin)
 	$currentgroup = $_GET['group'];
-	
+
 if($isAdmin && empty($_GET['group']) ){
 	$adminpage = 'Administrators Group Project Selection<br /><br />';
 	$adminpage .= 'Please select the group name of the project you wish to view:<br /><br />';
@@ -83,7 +83,7 @@ if($isAdmin && empty($_GET['group']) ){
 if(!$currentgroup){
 	$nogrouppage = 'You are currently not assigned to any group. Please check with your course professor.';
 }
-	
+
 
 // url parameters
 $params = array();
@@ -116,7 +116,7 @@ $members = array();
 $tasks = array();
 $members = getGroupMembers($currentgroup); //Get group members of the group, ID's and last access
 
-$tasks = getGroupsTasks($currentgroup); 
+$tasks = getGroupsTasks($currentgroup);
 $history = getGroupChatHistory($currentgroup); //Get Group chat history
 $html = ""; // Initiate blank HTML to create the screen.
 
@@ -130,11 +130,11 @@ $html .= "<table border=1 width=80%><tr><td style='vertical-align:top;'><table><
 	foreach($tasks as $task){
 		$name = getStudentName($task->members); //Get users assigned to the task
 
-		//If the task is complete, display a checkmark		
-		if($task->progress == 100) { 
+		//If the task is complete, display a checkmark
+		if($task->progress == 100) {
 			$html .= "<img src='pix/Check_mark.png'' width='12px' height='12px' />";
 		}
-		//Display the task name, link and edit 
+		//Display the task name, link and edit
 		$html .= " Task: <a href='task_view.php?cmid=".$id."&id=".$id."&t=".$task->id."'>".$task->name ."</a> <a href='task_edit.php?cmid=".$id."&id=".$id."&t=".$task->id."'><img src='pix/settings.png'' width='12px' height='12px' /></a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;For: ";
 			//Find and display all the users assigned to the task
 			$name_size = count($name);
@@ -148,7 +148,7 @@ $html .= "<table border=1 width=80%><tr><td style='vertical-align:top;'><table><
 		$html .= " <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Due: ".userdate($task->end_date, get_string('strftimedate', 'langconfig'));
 		//Create the progress bar using DIV tags to show quick view.
 		$html .= '<div style="border: solid 1px;width: 300px;height: 12px;">';
-		
+
 		//Determine if task is on time and bar colour.
 		$total_days = floor(($task->end_date - $task->start_date)/(60*60*24));  //Find the total number of days for the task
 		$time_done = floor((time() - $task->start_date)/(60*60*24)); //Find how many days into the task.
@@ -161,7 +161,7 @@ $html .= "<table border=1 width=80%><tr><td style='vertical-align:top;'><table><
 		}
 		$html .= '<div style="background-color: '.$progress_bar_colour.';width:'.$task->progress .'%; height:12px;">&nbsp;</div>'; //Green Progress bar to indicate complete
 		$html .= '<div style="position: relative;top:-11px;text-align:center;font-size:10px;font-weight:bold;">Progress: '.$task->progress.'%</div></div><br />';
-		
+
 	} //end foreach loop
 
 //Display Workload distribution link and possible alert.
@@ -179,7 +179,7 @@ $html .= "</table></td><td style='vertical-align:top;'>";
 
 //Right side of the screen for communication
 //List all the group members, and recent activity.
-$html .= "<table><tr><td><u>Group Members</u></td><td><u>Last Online</u></td></tr>"; 
+$html .= "<table><tr><td><u>Group Members</u></td><td><u>Last Online</u></td></tr>";
 	for($i = 0; $i< count($members); $i++){
 		//Messaging link
 		$sendmessageurl = new moodle_url('/message/index.php', array('id' => $members[$i][0]));
@@ -192,20 +192,20 @@ $html .= "<table><tr><td><u>Group Members</u></td><td><u>Last Online</u></td></t
 			else { //Otherwise do not display this icon.
 				$messagelink = "";
 			}
-	
+
 		if((time() - $members[$i][2]) <= 100){ //If user has been active in the past 100 seconds, they are online.
 			$html .= "<tr><td><a href='../../user/view.php?id=".$members[$i][0]."&course=".$course->id."'>".$members[$i][1]."</a> ". $messagelink."</td><td><font style='color:green;font-weight:bold;'>Online Now</font></td></tr>";
 		}
 		else { //Otherwise display the last time they were active.
 			if($members[$i][2] == 0)
-				$html .= "<tr><td><a href='../../user/view.php?id=".$members[$i][0]."&course=".$course->id."'>".$members[$i][1]."</a> ". $messagelink."</td><td>Never</td></tr>";				
+				$html .= "<tr><td><a href='../../user/view.php?id=".$members[$i][0]."&course=".$course->id."'>".$members[$i][1]."</a> ". $messagelink."</td><td>Never</td></tr>";
 			else
 				$html .= "<tr><td><a href='../../user/view.php?id=".$members[$i][0]."&course=".$course->id."'>".$members[$i][1]."</a> ". $messagelink."</td><td>".userdate($members[$i][2], get_string('strftimedatetimeshort', 'langconfig'))."</td></tr>";
 		}
 	}
 	//More communication links, forums, chats, imports
 	$html .= "</table><table><tr><td><u>Communication Tools</u></td></tr>";
-	
+
 	if($chat = $DB->get_record('course_modules', array('module'=>4, 'course'=>$COURSE->id, 'groupmode'=>1), 'id,instance')){
     if (! $chat = $DB->get_record('chat', array('id'=>$chat->instance))) {
         print_error('invalidid', 'chat');
@@ -216,13 +216,13 @@ $html .= "<table><tr><td><u>Group Members</u></td><td><u>Last Online</u></td></t
 		$html .= '<tr><td><img src="../../mod/chat/pix/icon.png" width="16px" height="16px"> ';
 		$html .= $OUTPUT->action_link($chattarget, $chat->name, new popup_action('click', $chattarget, "chat{$course->id}_{$chat->id}{$groupparam}", array('height' => 500, 'width' => 700))); //Create a link with a popout window for the chat.
 		$html .= '</td></tr>';
-		
+
 	}//End if user can chat
 }//End if chat is setup for course.
 
 //If Forums are setup for Groups, display links to them.
 $html .= displayForums();
-	
+
 //Display the previous imported communication history
 $html .="</table><table><tr><td><u>Communication History</u><br/>";
 	foreach($history as $history_item) { //Iterate through each imported type and display icon, link with time.

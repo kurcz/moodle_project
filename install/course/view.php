@@ -1,5 +1,29 @@
 <?php
 
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * List of all pages in course
+ *
+ * @package    mod
+ * @subpackage project
+ * @copyright  2016 onwards Jeffrey Kurcz
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 //  Display the course home page.
 
     require_once('../config.php');
@@ -48,7 +72,7 @@
 
     // Prevent caching of this page to stop confusion when changing page after making AJAX changes
     $PAGE->set_cacheable(false);
-	
+
 	$PAGE->requires->jquery();
 	// Add some jquery plugins for example jQuery-ui
 	$PAGE->requires->jquery_plugin('ui');
@@ -299,7 +323,7 @@
     include_course_ajax($course, $modnamesused);
 
     echo $OUTPUT->footer();
-	
+
 	$groupid = getGroupID($USER->id);
 	if(isset($groupid[$USER->id]->groupid))
 		echo $OUTPUT->box(checkAlerts($USER->id, $groupid[$USER->id]->groupid));
